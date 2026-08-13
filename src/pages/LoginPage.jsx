@@ -18,15 +18,23 @@ export const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(email, password, rememberMe);
+    const loggedUser = login(email, password, rememberMe);
     addToast('Welcome back to SafeRoad AI Platform!', 'success');
-    navigate('/dashboard');
+    if (loggedUser?.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const handleGoogleLogin = () => {
-    googleLogin();
+    const loggedUser = googleLogin();
     addToast('Signed in securely with Google OAuth 2.0', 'success');
-    navigate('/dashboard');
+    if (loggedUser?.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const handleForgotSubmit = (e) => {

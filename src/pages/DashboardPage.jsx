@@ -7,7 +7,7 @@ import { DASHBOARD_STATS, INITIAL_REPORTS, ANALYTICS_DATA } from '../utils/mockD
 import {
   ShieldAlert,
   AlertTriangle,
-  Car,
+
   CheckCircle,
   AlertOctagon,
   Users,
@@ -65,14 +65,7 @@ export const DashboardPage = () => {
           trend="+12%"
           trendLabel="mo"
         />
-        <StatCard
-          title="Total Accident Reports"
-          value={DASHBOARD_STATS.totalAccidents}
-          icon={Car}
-          color="red"
-          trend="-4%"
-          trendLabel="mo"
-        />
+
         <StatCard
           title="Roads Repaired"
           value={DASHBOARD_STATS.roadsRepaired}
@@ -153,18 +146,6 @@ export const DashboardPage = () => {
               </div>
             </Link>
 
-            <Link
-              to="/report-accident"
-              className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 hover:bg-red-500/10 transition group text-xs font-semibold text-slate-800 dark:text-slate-200"
-            >
-              <div className="p-2 rounded-lg bg-red-500/20 text-red-600">
-                <Car className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="group-hover:text-red-600 transition">Report Collision Site</p>
-                <p className="text-[10px] text-slate-400 font-normal">Alert emergency teams</p>
-              </div>
-            </Link>
 
             <Link
               to="/map"

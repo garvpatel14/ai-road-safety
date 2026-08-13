@@ -17,9 +17,11 @@ import {
   Layers
 } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
 
 export const LandingPage = () => {
   const { addToast } = useNotifications();
+  const { isAuthenticated } = useAuth();
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
@@ -73,13 +75,13 @@ export const LandingPage = () => {
               className="flex flex-wrap justify-center items-center gap-4 pt-4"
             >
               <Link
-                to="/safe-route"
+                to="/login"
                 className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-safety-500 text-white font-bold text-sm shadow-xl shadow-brand-500/25 hover:opacity-95 hover:scale-105 transition transform duration-200"
               >
                 Plan Safe Route <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                to="/map"
+                to="/login"
                 className="flex items-center gap-2 px-6 py-3.5 rounded-2xl glass-panel text-slate-800 dark:text-white font-bold text-sm border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
                 <MapPin className="w-4 h-4 text-safety-500" /> Live Hazard Map

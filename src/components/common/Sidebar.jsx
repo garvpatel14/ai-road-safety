@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard,
   AlertTriangle,
-  Car,
   MapPin,
   Navigation,
   BarChart3,
@@ -19,26 +18,29 @@ import {
 export const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
-  const mainNavItems = [
+  const userNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Interactive Map', path: '/map', icon: MapPin },
     { name: 'Safe Route Planner', path: '/safe-route', icon: Navigation, badge: 'AI' },
     { name: 'Report Damage', path: '/report-damage', icon: AlertTriangle },
-    { name: 'Report Accident', path: '/report-accident', icon: Car },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'My Reports', path: '/my-reports', icon: FileText },
     { name: 'Notifications', path: '/notifications', icon: Bell },
     { name: 'Profile', path: '/profile', icon: User },
   ];
 
-  if (user?.role === 'admin') {
-    mainNavItems.push({
-      name: 'Admin Control Hub',
-      path: '/admin',
-      icon: ShieldCheck,
-      badge: 'Admin'
-    });
-  }
+  const adminNavItems = [
+    { name: 'Admin Dashboard', path: '/admin', icon: ShieldCheck, badge: 'Admin' },
+    { name: 'Interactive Map', path: '/map', icon: MapPin },
+    { name: 'Safe Route Planner', path: '/safe-route', icon: Navigation, badge: 'AI' },
+    { name: 'City Analytics', path: '/analytics', icon: BarChart3 },
+    { name: 'All Damage Reports', path: '/my-reports', icon: FileText },
+    { name: 'Notifications', path: '/notifications', icon: Bell },
+    { name: 'Admin Profile', path: '/profile', icon: User },
+  ];
+
+  const isAdmin = user?.role === 'admin';
+  const mainNavItems = isAdmin ? adminNavItems : userNavItems;
 
   return (
     <>
@@ -59,20 +61,31 @@ export const Sidebar = ({ isOpen, onClose }) => {
           
           {/* Quick Action Button */}
           <div className="pt-2">
-            <NavLink
-              to="/report-damage"
-              onClick={onClose}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-safety-600 to-brand-600 hover:from-safety-500 hover:to-brand-500 text-white font-semibold text-sm shadow-md shadow-safety-500/20 hover:shadow-lg transition group"
-            >
-              <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition transform duration-300" />
-              <span>Report Road Issue</span>
-            </NavLink>
+            {isAdmin ? (
+              <NavLink
+                to="/admin"
+                onClick={onClose}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-brand-600 hover:from-amber-500 hover:to-brand-500 text-white font-semibold text-sm shadow-md shadow-amber-500/20 hover:shadow-lg transition group"
+              >
+                <ShieldCheck className="w-5 h-5" />
+                <span>Admin Control Center</span>
+              </NavLink>
+            ) : (
+              <NavLink
+                to="/report-damage"
+                onClick={onClose}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-safety-600 to-brand-600 hover:from-safety-500 hover:to-brand-500 text-white font-semibold text-sm shadow-md shadow-safety-500/20 hover:shadow-lg transition group"
+              >
+                <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition transform duration-300" />
+                <span>Report Road Issue</span>
+              </NavLink>
+            )}
           </div>
 
           {/* Navigation Links */}
           <div className="space-y-1">
             <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Platform Navigation
+              {isAdmin ? 'Admin Management' : 'Platform Navigation'}
             </p>
             {mainNavItems.map((item) => {
               const Icon = item.icon;

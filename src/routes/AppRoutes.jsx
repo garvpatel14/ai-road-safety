@@ -9,7 +9,7 @@ const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({ default: 
 const RegisterPage = lazy(() => import('../pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const DashboardPage = lazy(() => import('../pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const ReportDamagePage = lazy(() => import('../pages/ReportDamagePage').then(m => ({ default: m.ReportDamagePage })));
-const ReportAccidentPage = lazy(() => import('../pages/ReportAccidentPage').then(m => ({ default: m.ReportAccidentPage })));
+
 const InteractiveMapPage = lazy(() => import('../pages/InteractiveMapPage').then(m => ({ default: m.InteractiveMapPage })));
 const SafeRoutePage = lazy(() => import('../pages/SafeRoutePage').then(m => ({ default: m.SafeRoutePage })));
 const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })));
@@ -17,6 +17,24 @@ const MyReportsPage = lazy(() => import('../pages/MyReportsPage').then(m => ({ d
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
 const ProfilePage = lazy(() => import('../pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })));
+
+import { useAuth } from '../context/AuthContext';
+
+const UserRoute = ({ children }) => {
+  const { user } = useAuth();
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user } = useAuth();
+  if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+};
 
 export const AppRoutes = () => {
   return (
@@ -31,16 +49,16 @@ export const AppRoutes = () => {
 
         {/* Main Dashboard & App Pages Layout */}
         <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<UserRoute><DashboardPage /></UserRoute>} />
           <Route path="/report-damage" element={<ReportDamagePage />} />
-          <Route path="/report-accident" element={<ReportAccidentPage />} />
+
           <Route path="/map" element={<InteractiveMapPage />} />
           <Route path="/safe-route" element={<SafeRoutePage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/my-reports" element={<MyReportsPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
         </Route>
 
         {/* Catch-all redirect */}
