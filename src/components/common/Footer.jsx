@@ -44,7 +44,6 @@ export const Footer = () => {
             <h4 className="text-sm font-semibold text-white mb-3">Community Actions</h4>
             <ul className="space-y-2 text-xs">
               <li><Link to="/report-damage" className="hover:text-white transition">Report Pothole / Crack</Link></li>
-              <li><Link to="/report-accident" className="hover:text-white transition">Report Traffic Collision</Link></li>
               <li><Link to="/my-reports" className="hover:text-white transition">Track Submitted Issues</Link></li>
               <li><Link to="/notifications" className="hover:text-white transition">Emergency Hazard Feeds</Link></li>
             </ul>

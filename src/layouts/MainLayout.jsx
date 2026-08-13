@@ -29,7 +29,7 @@ export const MainLayout = () => {
 export const PublicLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      <Navbar />
+      <Navbar isPublic={true} />
       <main className="flex-1 w-full">
         <Outlet />
       </main>
