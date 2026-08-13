@@ -16,6 +16,15 @@ export const INITIAL_REPORTS = [
     reportedBy: 'Alex Morgan',
     aiConfidence: '98%',
     upvotes: 24,
+    depthCm: 14.2,
+    widthCm: 45.0,
+    areaSqM: 0.16,
+    priorityScore: 88,
+    district: 'Central Commercial',
+    comments: [
+      { id: 1, user: 'Sarah Connor', text: 'Damaged my tire rim yesterday night! Needs urgent repair.', time: '2 hours ago' },
+      { id: 2, user: 'City Inspector #12', text: 'Scheduled for emergency patching crew.', time: '30 mins ago' }
+    ]
   },
   {
     id: 'REP-1002',
@@ -32,6 +41,14 @@ export const INITIAL_REPORTS = [
     reportedBy: 'Sarah Connor',
     aiConfidence: '92%',
     upvotes: 12,
+    depthCm: 4.5,
+    widthCm: 12.0,
+    areaSqM: 1.25,
+    priorityScore: 54,
+    district: 'North Bay Ward',
+    comments: [
+      { id: 1, user: 'Cycling Guild', text: 'Hazardous for thin road bike tires.', time: '1 day ago' }
+    ]
   },
   {
     id: 'REP-1003',
@@ -49,6 +66,12 @@ export const INITIAL_REPORTS = [
     reportedBy: 'Traffic Cam AI #04',
     aiConfidence: '99%',
     upvotes: 45,
+    depthCm: 0,
+    widthCm: 0,
+    areaSqM: 0,
+    priorityScore: 96,
+    district: 'Highway Corridor 101',
+    comments: []
   },
   {
     id: 'REP-1004',
@@ -65,6 +88,12 @@ export const INITIAL_REPORTS = [
     reportedBy: 'Dept of Transport',
     aiConfidence: '100%',
     upvotes: 89,
+    depthCm: 0,
+    widthCm: 0,
+    areaSqM: 12.0,
+    priorityScore: 10,
+    district: 'Sunset District',
+    comments: []
   },
   {
     id: 'REP-1005',
@@ -81,6 +110,12 @@ export const INITIAL_REPORTS = [
     reportedBy: 'David Miller',
     aiConfidence: '95%',
     upvotes: 31,
+    depthCm: 18.5,
+    widthCm: 60.0,
+    areaSqM: 0.45,
+    priorityScore: 92,
+    district: 'Central Commercial',
+    comments: []
   },
   {
     id: 'REP-1006',
@@ -97,6 +132,93 @@ export const INITIAL_REPORTS = [
     reportedBy: 'Elena Rostova',
     aiConfidence: '91%',
     upvotes: 18,
+    depthCm: 22.0,
+    widthCm: 110.0,
+    areaSqM: 2.80,
+    priorityScore: 78,
+    district: 'Skyline Hills',
+    comments: []
+  }
+];
+
+export const MOCK_RQI_SEGMENTS = [
+  { id: 'RQI-1', name: 'Downtown Market St Corridor', rqiScore: 38, status: 'Poor', lat1: 37.7749, lng1: -122.4194, lat2: 37.7780, lng2: -122.4120 },
+  { id: 'RQI-2', name: 'Oakland Blvd Bridge Approach', rqiScore: 65, status: 'Fair', lat1: 37.7833, lng1: -122.4167, lat2: 37.7890, lng2: -122.4100 },
+  { id: 'RQI-3', name: 'Sunset Expressway Westbound', rqiScore: 92, status: 'Good', lat1: 37.7590, lng1: -122.4350, lat2: 37.7520, lng2: -122.4450 },
+  { id: 'RQI-4', name: 'Skyline Mountain Pass South', rqiScore: 52, status: 'Fair', lat1: 37.7400, lng1: -122.4500, lat2: 37.7320, lng2: -122.4600 },
+];
+
+export const MOCK_WORK_ORDERS = [
+  {
+    id: 'WO-8801',
+    reportId: 'REP-1005',
+    title: 'Market St Emergency Asphalt Patching',
+    crewAssigned: 'Alpha Crew #4 (Cold Mix Team)',
+    contractor: 'Apex Infrastructure Ltd.',
+    estimatedCost: '$3,800',
+    status: 'In Progress',
+    startDate: '2026-08-12',
+    completionTarget: '2026-08-14',
+    progressPct: 65,
+    beforeImage: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+    afterImage: 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 'WO-8802',
+    reportId: 'REP-1003',
+    title: 'Hwy 101 Guardrail & Surface Re-alignment',
+    crewAssigned: 'Highway Rapid Ops Unit',
+    contractor: 'Bay Area Road Contractors',
+    estimatedCost: '$12,500',
+    status: 'Scheduled',
+    startDate: '2026-08-15',
+    completionTarget: '2026-08-17',
+    progressPct: 15,
+    beforeImage: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80',
+    afterImage: null,
+  },
+  {
+    id: 'WO-8803',
+    reportId: 'REP-1004',
+    title: 'Sunset Expressway Repaving Section B',
+    crewAssigned: 'Heavy Machinery Paving Team B',
+    contractor: 'City Public Works',
+    estimatedCost: '$8,200',
+    status: 'Completed',
+    startDate: '2026-07-26',
+    completionTarget: '2026-07-28',
+    progressPct: 100,
+    beforeImage: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80',
+    afterImage: 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80',
+  }
+];
+
+export const MOCK_VERIFICATION_QUEUE = [
+  {
+    id: 'VER-401',
+    reportId: 'REP-1001',
+    type: 'Pothole',
+    aiConfidence: 0.98,
+    estimatedDepth: '14.2 cm',
+    estimatedArea: '0.16 sq m',
+    officerStatus: 'Pending Verification',
+    aiFlaggedSeverity: 'High',
+    location: 'Main St & 4th Ave, Downtown',
+    image: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+    inspectionNotes: 'AI model suggests high risk of vehicle axle breakdown due to sharp crater edge.'
+  },
+  {
+    id: 'VER-402',
+    reportId: 'REP-1006',
+    type: 'Shoulder Erosion',
+    aiConfidence: 0.91,
+    estimatedDepth: '22.0 cm',
+    estimatedArea: '2.80 sq m',
+    officerStatus: 'Pending Verification',
+    aiFlaggedSeverity: 'High',
+    location: 'Skyline Drive South',
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80',
+    inspectionNotes: 'Heavy rain runoff washed away sub-grade support.'
   }
 ];
 

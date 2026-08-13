@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { LeafletMap } from '../components/maps/LeafletMap';
-import { INITIAL_REPORTS } from '../utils/mockData';
+import { INITIAL_REPORTS, MOCK_RQI_SEGMENTS } from '../utils/mockData';
+import { RoadHazardDetailsModal } from '../components/common/RoadHazardDetailsModal';
 import {
   Filter,
   MapPin,
   AlertTriangle,
-  Car,
-  CheckCircle2,
+  Layers,
   RefreshCw,
-  Search
+  Search,
+  Activity,
+  CheckCircle2
 } from 'lucide-react';
 import { Card } from '../components/common/Card';
 
@@ -18,6 +20,8 @@ export const InteractiveMapPage = () => {
   const [severityFilter, setSeverityFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showRqiLayer, setShowRqiLayer] = useState(true);
+  const [selectedHazard, setSelectedHazard] = useState(null);
 
   // Filter Reports Logic
   const filteredReports = reports.filter((r) => {
@@ -44,16 +48,31 @@ export const InteractiveMapPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold border border-brand-500/20 mb-1">
+            <Layers className="w-4 h-4" /> Road Quality Index (RQI) Spatial Map
+          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Interactive Hazard & Repair Map
+            Road Quality & Hazard Interactive Map
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Real-time geospatial OpenStreetMap mapping with color-coded severity markers.
+            Real-time geospatial road condition mapping with RQI surface smoothness heatmap layers.
           </p>
         </div>
 
-        {/* Marker Legend */}
+        {/* Marker Legend & RQI Toggle */}
         <div className="flex flex-wrap items-center gap-3 glass-panel p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs">
+          <button
+            onClick={() => setShowRqiLayer(!showRqiLayer)}
+            className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 transition ${
+              showRqiLayer ? 'bg-brand-600 text-white shadow' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            {showRqiLayer ? 'RQI Layer ACTIVE' : 'Enable RQI Layer'}
+          </button>
+
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 hidden sm:block" />
+
           <span className="font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">Legend:</span>
           <span className="flex items-center gap-1 font-semibold text-safety-600 dark:text-safety-400">
             <span className="w-2.5 h-2.5 rounded-full bg-safety-500" /> Potholes
@@ -143,14 +162,42 @@ export const InteractiveMapPage = () => {
 
         <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-200/60 dark:border-slate-800">
           <span>Displaying <strong>{filteredReports.length}</strong> active map pin(s)</span>
-          <span className="font-medium text-brand-600 dark:text-brand-400">Click markers for details & photo evidence</span>
+          <span className="font-medium text-brand-600 dark:text-brand-400">Click markers to view depth specs & full hazard details</span>
         </div>
       </Card>
+
+      {/* ROAD QUALITY INDEX (RQI) SEGMENTS BANNER */}
+      {showRqiLayer && (
+        <div className="p-3.5 rounded-2xl bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 text-xs shadow-xl">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <span className="font-bold">Live Surface Smoothness RQI Corridors:</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {MOCK_RQI_SEGMENTS.map(rqi => (
+              <div key={rqi.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700">
+                <span className="font-semibold text-slate-300">{rqi.name}:</span>
+                <span className={`font-extrabold ${rqi.status === 'Good' ? 'text-emerald-400' : rqi.status === 'Fair' ? 'text-amber-400' : 'text-red-400'}`}>
+                  RQI {rqi.rqiScore}/100 ({rqi.status})
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* MAP CONTAINER */}
       <div className="h-[600px] w-full rounded-3xl overflow-hidden shadow-2xl">
         <LeafletMap reports={filteredReports} />
       </div>
+
+      {/* HAZARD DETAILS MODAL */}
+      <RoadHazardDetailsModal
+        isOpen={Boolean(selectedHazard)}
+        onClose={() => setSelectedHazard(null)}
+        hazard={selectedHazard}
+      />
 
     </div>
   );
