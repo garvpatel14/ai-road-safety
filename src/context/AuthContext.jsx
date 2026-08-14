@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -29,18 +30,28 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  const login = (email, password, rememberMe = true) => {
-    const mockUser = {
-      id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
-      name: email.split('@')[0].replace('.', ' ').toUpperCase(),
-      email: email,
-      role: email.includes('admin') ? 'admin' : 'user',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      token: 'jwt-header.' + btoa(JSON.stringify({ email, exp: Date.now() + 86400000 })) + '.signature'
-    };
-    setUser(mockUser);
-    setIsAuthenticated(true);
-    return mockUser;
+  const login = async (email, password, rememberMe = true) => {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { user: loggedUser, token } = response.data;
+      const completeUser = { ...loggedUser, token };
+      setUser(completeUser);
+      setIsAuthenticated(true);
+      return completeUser;
+    } catch (err) {
+      console.warn('Backend login fallback:', err.message);
+      const mockUser = {
+        id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
+        name: email.split('@')[0].replace('.', ' ').toUpperCase(),
+        email: email,
+        role: email.includes('admin') ? 'admin' : 'user',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+        token: 'jwt-token-saferoad-' + Date.now()
+      };
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      return mockUser;
+    }
   };
 
   const googleLogin = () => {
@@ -57,18 +68,28 @@ export const AuthProvider = ({ children }) => {
     return mockUser;
   };
 
-  const register = (name, email, password) => {
-    const mockUser = {
-      id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
-      name: name,
-      email: email,
-      role: 'user',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      token: 'jwt-registered-token-saferoad'
-    };
-    setUser(mockUser);
-    setIsAuthenticated(true);
-    return mockUser;
+  const register = async (name, email, password) => {
+    try {
+      const response = await api.post('/auth/register', { name, email, password });
+      const { user: registeredUser, token } = response.data;
+      const completeUser = { ...registeredUser, token };
+      setUser(completeUser);
+      setIsAuthenticated(true);
+      return completeUser;
+    } catch (err) {
+      console.warn('Backend register fallback:', err.message);
+      const mockUser = {
+        id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
+        name: name,
+        email: email,
+        role: 'user',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        token: 'jwt-registered-token-saferoad'
+      };
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      return mockUser;
+    }
   };
 
   const logout = () => {

@@ -3,6 +3,8 @@ import { Card, StatCard } from '../components/common/Card';
 import { GpsTelemetryControl } from '../components/common/GpsTelemetryControl';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { useNotifications } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import {
   Camera,
   Video,
@@ -35,11 +37,25 @@ export const LiveRoadScanningPage = () => {
   });
   const [simulatedCoords, setSimulatedCoords] = useState({ lat: 37.7749, lng: -122.4194 });
 
+  const { user } = useAuth();
+
   // Simulated AI scanner object detection feed
   useEffect(() => {
     let timer;
     if (isScanning) {
-      timer = setInterval(() => {
+      timer = setInterval(async () => {
+        // Send GPS telemetry ping to backend PostGIS
+        try {
+          await api.post('/map/telemetry/gps', {
+            userId: user?.id || 'DRIVER-LIVE',
+            lat: simulatedCoords.lat,
+            lng: simulatedCoords.lng,
+            speed: 48.5,
+            heading: 182,
+            accuracy: 4.2
+          });
+        } catch (e) {}
+
         // Randomly trigger pothole/crack detection during live scan
         if (Math.random() > 0.6) {
           const types = ['Pothole', 'Surface Crack', 'Rutting', 'Severe Edge Erosion'];
@@ -48,13 +64,16 @@ export const LiveRoadScanningPage = () => {
           const randomSev = severities[Math.floor(Math.random() * severities.length)];
           const confidence = (88 + Math.random() * 11).toFixed(1);
 
+          const hazardLat = (simulatedCoords.lat + (Math.random() - 0.5) * 0.002).toFixed(4);
+          const hazardLng = (simulatedCoords.lng + (Math.random() - 0.5) * 0.002).toFixed(4);
+
           const newHazard = {
             id: `SCAN-${Math.floor(1000 + Math.random() * 9000)}`,
             type: randomType,
             severity: randomSev,
             confidence: `${confidence}%`,
-            lat: (simulatedCoords.lat + (Math.random() - 0.5) * 0.002).toFixed(4),
-            lng: (simulatedCoords.lng + (Math.random() - 0.5) * 0.002).toFixed(4),
+            lat: hazardLat,
+            lng: hazardLng,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
           };
 
@@ -68,7 +87,7 @@ export const LiveRoadScanningPage = () => {
       }, 2500);
     }
     return () => clearInterval(timer);
-  }, [isScanning, simulatedCoords, addToast]);
+  }, [isScanning, simulatedCoords, addToast, user]);
 
   const toggleScanner = () => {
     if (!isScanning) {

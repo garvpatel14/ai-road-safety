@@ -23,7 +23,7 @@ export const LoginPage = () => {
     if (loggedUser?.role === 'admin') {
       navigate('/admin');
     } else {
-      navigate('/dashboard');
+      navigate('/live-scan');
     }
   };
 
@@ -33,7 +33,7 @@ export const LoginPage = () => {
     if (loggedUser?.role === 'admin') {
       navigate('/admin');
     } else {
-      navigate('/dashboard');
+      navigate('/live-scan');
     }
   };
 

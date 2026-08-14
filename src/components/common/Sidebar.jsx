@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
-  LayoutDashboard,
   AlertTriangle,
   MapPin,
   Navigation,
@@ -26,7 +25,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   const userNavItems = [
-    { name: 'User Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Live Road Scan', path: '/live-scan', icon: Camera, badge: 'HUD' },
     { name: 'AI Pothole Detection', path: '/ai-detection', icon: Cpu, badge: 'Vision' },
     { name: 'GPS Location Drive', path: '/gps-location', icon: Radio, badge: 'GNSS' },

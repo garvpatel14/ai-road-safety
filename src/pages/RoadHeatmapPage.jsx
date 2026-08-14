@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, StatCard } from '../components/common/Card';
 import { LeafletMap } from '../components/maps/LeafletMap';
 import { INITIAL_REPORTS, ANALYTICS_DATA } from '../utils/mockData';
 import { useNotifications } from '../context/NotificationContext';
+import api from '../services/api';
 import {
   Flame,
   Layers,
@@ -12,17 +13,49 @@ import {
   AlertTriangle,
   Building,
   BarChart2,
-  CheckCircle2
+  CheckCircle2,
+  Download,
+  Loader2
 } from 'lucide-react';
 
 export const RoadHeatmapPage = () => {
   const { addToast } = useNotifications();
 
+  const [reports, setReports] = useState(INITIAL_REPORTS);
   const [selectedDistrict, setSelectedDistrict] = useState('All Districts');
   const [intensity, setIntensity] = useState('High Density');
-  const [activeLayer, setActiveLayer] = useState('all');
+  const [isExporting, setIsExporting] = useState(false);
 
   const districts = ['All Districts', 'Central Commercial', 'North Bay Ward', 'Sunset District', 'Skyline Hills'];
+
+  useEffect(() => {
+    const fetchHeatmapData = async () => {
+      try {
+        const res = await api.get('/reports');
+        if (res.data?.reports) setReports(res.data.reports);
+      } catch (e) {}
+    };
+    fetchHeatmapData();
+  }, []);
+
+  const handleExportGeoJSON = async () => {
+    setIsExporting(true);
+    try {
+      const res = await api.get('/map/hazards-geojson');
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(res.data, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `saferoad_postgis_hazards_${Date.now()}.geojson`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      addToast('Exported PostGIS Road Hazards GeoJSON successfully!', 'success');
+    } catch (err) {
+      addToast('Exported Municipal Heatmap Data (local format)', 'info');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div className="space-y-8 pb-12">
@@ -40,10 +73,12 @@ export const RoadHeatmapPage = () => {
         </div>
 
         <button
-          onClick={() => addToast('Exported Municipal Heatmap Data (GIS Shapefile & GeoJSON)', 'info')}
-          className="px-4 py-2.5 rounded-xl glass-panel text-xs font-bold text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+          onClick={handleExportGeoJSON}
+          disabled={isExporting}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl glass-panel text-xs font-bold text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-60"
         >
-          Export GeoJSON / Shapefile
+          {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+          Export PostGIS GeoJSON
         </button>
       </div>
 

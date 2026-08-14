@@ -9,7 +9,6 @@ const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({ default: 
 const RegisterPage = lazy(() => import('../pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 
 // User Side Pages
-const DashboardPage = lazy(() => import('../pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const LiveRoadScanningPage = lazy(() => import('../pages/LiveRoadScanningPage').then(m => ({ default: m.LiveRoadScanningPage })));
 const AiDetectionPage = lazy(() => import('../pages/AiDetectionPage').then(m => ({ default: m.AiDetectionPage })));
 const GpsLocationPage = lazy(() => import('../pages/GpsLocationPage').then(m => ({ default: m.GpsLocationPage })));
@@ -41,7 +40,7 @@ const UserRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { user } = useAuth();
   if (user?.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/live-scan" replace />;
   }
   return children;
 };
@@ -60,7 +59,7 @@ export const AppRoutes = () => {
         {/* Main Dashboard & App Pages Layout */}
         <Route element={<MainLayout />}>
           {/* User Side Modules */}
-          <Route path="/dashboard" element={<UserRoute><DashboardPage /></UserRoute>} />
+          <Route path="/dashboard" element={<Navigate to="/live-scan" replace />} />
           <Route path="/live-scan" element={<LiveRoadScanningPage />} />
           <Route path="/ai-detection" element={<AiDetectionPage />} />
           <Route path="/gps-location" element={<GpsLocationPage />} />
