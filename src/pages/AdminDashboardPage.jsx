@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { StatCard, Card } from '../components/common/Card';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { INITIAL_REPORTS, MOCK_USERS, DASHBOARD_STATS } from '../utils/mockData';
 import { useNotifications } from '../context/NotificationContext';
+import { RoadHazardDetailsModal } from '../components/common/RoadHazardDetailsModal';
 import {
   ShieldCheck,
   Users,
@@ -14,13 +16,13 @@ import {
   Clock,
   Filter,
   Search,
-  Settings,
-  Sliders,
   Download,
-  CheckCircle2,
-  Trash2
+  Flame,
+  UserCheck,
+  BarChart3,
+  Eye,
+  Building
 } from 'lucide-react';
-import { Modal } from '../components/common/Modal';
 
 export const AdminDashboardPage = () => {
   const { addToast } = useNotifications();
@@ -30,6 +32,14 @@ export const AdminDashboardPage = () => {
   const [users, setUsers] = useState(MOCK_USERS);
   const [selectedReport, setSelectedReport] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const municipalModules = [
+    { name: 'Road Heatmap', path: '/admin/heatmap', icon: Flame, color: 'text-red-500 bg-red-500/10', desc: 'Defect density & corridor risk' },
+    { name: 'Pothole Management', path: '/admin/potholes', icon: FileText, color: 'text-brand-500 bg-brand-500/10', desc: 'Triage & priority matrix sorting' },
+    { name: 'Repair Dispatch', path: '/admin/repairs', icon: Wrench, color: 'text-amber-500 bg-amber-500/10', desc: 'Work orders & crew dispatch' },
+    { name: 'Verification Desk', path: '/admin/verification', icon: UserCheck, color: 'text-emerald-500 bg-emerald-500/10', desc: 'AI confidence & engineer audit' },
+    { name: 'City Analytics', path: '/analytics', icon: BarChart3, color: 'text-purple-500 bg-purple-500/10', desc: 'SLA response times & budgets' },
+  ];
 
   // Handle Approve Report
   const handleApproveReport = (id) => {
@@ -74,11 +84,11 @@ export const AdminDashboardPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold border border-amber-500/20 mb-1">
-            <ShieldCheck className="w-4 h-4" /> Admin Supervisor Portal
+            <ShieldCheck className="w-4 h-4" /> Municipality Command Center
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Admin Operations Hub</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Admin Operations & Control</h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Moderate community submissions, issue work orders, and assign repair crews.
+            Moderate community submissions, audit AI detections, issue work orders, and assign repair crews.
           </p>
         </div>
 
@@ -90,10 +100,32 @@ export const AdminDashboardPage = () => {
         </button>
       </div>
 
+      {/* QUICK LAUNCHER CARDS FOR MUNICIPALITY MODULES */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {municipalModules.map((m) => {
+          const Icon = m.icon;
+          return (
+            <Link
+              key={m.path}
+              to={m.path}
+              className="p-3.5 rounded-2xl glass-panel border border-slate-200/60 dark:border-slate-800/80 hover:scale-105 hover:border-amber-500/50 transition duration-200 flex flex-col justify-between space-y-2 group shadow-sm"
+            >
+              <div className={`p-2.5 rounded-xl w-max ${m.color}`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-extrabold text-xs text-slate-900 dark:text-white group-hover:text-amber-600 transition">{m.name}</p>
+                <p className="text-[10px] text-slate-400 font-medium line-clamp-1">{m.desc}</p>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
       {/* 4 ADMIN STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Registered Users"
+          title="Registered Platform Users"
           value={users.length}
           icon={Users}
           color="brand"
@@ -105,13 +137,13 @@ export const AdminDashboardPage = () => {
           color="safety"
         />
         <StatCard
-          title="Pending Repairs"
+          title="Pending Repairs Queue"
           value={reports.filter(r => r.status === 'Pending' || r.status === 'In Progress').length}
           icon={Wrench}
           color="purple"
         />
         <StatCard
-          title="Dangerous Road Corridors"
+          title="Dangerous Corridors"
           value={47}
           icon={AlertTriangle}
           color="red"
@@ -147,7 +179,7 @@ export const AdminDashboardPage = () => {
       {(activeTab === 'overview' || activeTab === 'reports') && (
         <Card className="space-y-4 p-0 overflow-hidden">
           <div className="p-4 border-b border-slate-200/60 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">
+            <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
               Submitted Road & Incident Reports
             </h3>
             <div className="relative">
@@ -203,6 +235,13 @@ export const AdminDashboardPage = () => {
                           >
                             <XCircle className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => setSelectedReport(r)}
+                            title="Inspect Specs"
+                            className="p-1.5 rounded-lg bg-brand-500/10 text-brand-600 hover:bg-brand-500/20 transition"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
 
@@ -233,7 +272,7 @@ export const AdminDashboardPage = () => {
       {(activeTab === 'users') && (
         <Card className="space-y-4 p-0 overflow-hidden">
           <div className="p-4 border-b border-slate-200/60 dark:border-slate-800">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">
+            <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
               Registered Platform Users & Inspectors
             </h3>
           </div>
@@ -282,7 +321,7 @@ export const AdminDashboardPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {['Scheduled', 'In Progress', 'Resolved'].map((statusGroup) => (
             <Card key={statusGroup} className="space-y-4">
-              <h3 className="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider flex items-center justify-between">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-sm uppercase tracking-wider flex items-center justify-between">
                 <span>{statusGroup} Work Orders</span>
                 <StatusBadge status={statusGroup} />
               </h3>
@@ -312,6 +351,13 @@ export const AdminDashboardPage = () => {
           ))}
         </div>
       )}
+
+      {/* Hazard Details Modal */}
+      <RoadHazardDetailsModal
+        isOpen={Boolean(selectedReport)}
+        onClose={() => setSelectedReport(null)}
+        hazard={selectedReport}
+      />
 
     </div>
   );

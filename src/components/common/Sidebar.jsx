@@ -12,15 +12,25 @@ import {
   User,
   ShieldCheck,
   PlusCircle,
-  Sparkles
+  Sparkles,
+  Camera,
+  Cpu,
+  Radio,
+  Flame,
+  Wrench,
+  UserCheck,
+  Activity
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   const userNavItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Interactive Map', path: '/map', icon: MapPin },
+    { name: 'User Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Live Road Scan', path: '/live-scan', icon: Camera, badge: 'HUD' },
+    { name: 'AI Pothole Detection', path: '/ai-detection', icon: Cpu, badge: 'Vision' },
+    { name: 'GPS Location Drive', path: '/gps-location', icon: Radio, badge: 'GNSS' },
+    { name: 'Road Quality Map', path: '/map', icon: MapPin },
     { name: 'Safe Route Planner', path: '/safe-route', icon: Navigation, badge: 'AI' },
     { name: 'Report Damage', path: '/report-damage', icon: AlertTriangle },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
@@ -31,6 +41,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   const adminNavItems = [
     { name: 'Admin Dashboard', path: '/admin', icon: ShieldCheck, badge: 'Admin' },
+    { name: 'Road Surface Heatmap', path: '/admin/heatmap', icon: Flame, badge: 'Heat' },
+    { name: 'Pothole Management', path: '/admin/potholes', icon: FileText, badge: 'Queue' },
+    { name: 'Repair Dispatch', path: '/admin/repairs', icon: Wrench, badge: 'Dispatch' },
+    { name: 'Road Verification Desk', path: '/admin/verification', icon: UserCheck, badge: 'Audit' },
     { name: 'Interactive Map', path: '/map', icon: MapPin },
     { name: 'Safe Route Planner', path: '/safe-route', icon: Navigation, badge: 'AI' },
     { name: 'City Analytics', path: '/analytics', icon: BarChart3 },
@@ -57,35 +71,35 @@ export const Sidebar = ({ isOpen, onClose }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } overflow-y-auto flex flex-col justify-between`}
       >
-        <div className="space-y-6">
+        <div className="space-y-5">
           
           {/* Quick Action Button */}
-          <div className="pt-2">
+          <div className="pt-1">
             {isAdmin ? (
               <NavLink
                 to="/admin"
                 onClick={onClose}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-brand-600 hover:from-amber-500 hover:to-brand-500 text-white font-semibold text-sm shadow-md shadow-amber-500/20 hover:shadow-lg transition group"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-brand-600 hover:from-amber-500 hover:to-brand-500 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 hover:shadow-lg transition group"
               >
-                <ShieldCheck className="w-5 h-5" />
-                <span>Admin Control Center</span>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Admin Command Center</span>
               </NavLink>
             ) : (
               <NavLink
-                to="/report-damage"
+                to="/live-scan"
                 onClick={onClose}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-safety-600 to-brand-600 hover:from-safety-500 hover:to-brand-500 text-white font-semibold text-sm shadow-md shadow-safety-500/20 hover:shadow-lg transition group"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-safety-600 to-brand-600 hover:from-safety-500 hover:to-brand-500 text-white font-extrabold text-xs shadow-md shadow-safety-500/20 hover:shadow-lg transition group"
               >
-                <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition transform duration-300" />
-                <span>Report Road Issue</span>
+                <Camera className="w-4 h-4 group-hover:scale-110 transition transform duration-300" />
+                <span>Start Live Scanner HUD</span>
               </NavLink>
             )}
           </div>
 
           {/* Navigation Links */}
           <div className="space-y-1">
-            <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              {isAdmin ? 'Admin Management' : 'Platform Navigation'}
+            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+              {isAdmin ? 'Municipality Management' : 'Citizen Platform'}
             </p>
             {mainNavItems.map((item) => {
               const Icon = item.icon;
@@ -95,21 +109,21 @@ export const Sidebar = ({ isOpen, onClose }) => {
                   to={item.path}
                   onClick={onClose}
                   className={({ isActive }) =>
-                    `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition duration-150 ${
+                    `flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition duration-150 ${
                       isActive
-                        ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
+                        ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30 font-bold'
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                     }`
                   }
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4" />
-                    <span>{item.name}</span>
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{item.name}</span>
                   </div>
                   {item.badge && (
                     <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                        item.badge === 'Admin'
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        item.badge === 'Admin' || item.badge === 'Dispatch' || item.badge === 'Audit'
                           ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
                           : 'bg-safety-500/20 text-safety-600 dark:text-safety-400'
                       }`}
@@ -124,16 +138,16 @@ export const Sidebar = ({ isOpen, onClose }) => {
         </div>
 
         {/* Bottom AI Status Box */}
-        <div className="pt-4 border-t border-slate-200/60 dark:border-slate-800">
-          <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400">
-              <Sparkles className="w-4 h-4 animate-spin-slow" />
+        <div className="pt-3 border-t border-slate-200/60 dark:border-slate-800">
+          <div className="p-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400">
+              <Sparkles className="w-3.5 h-3.5 animate-spin-slow" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">AI Model Active</p>
-              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
+              <p className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200">AI Vision Engine</p>
+              <p className="text-[9px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                Live Vision v4.2
+                Active v4.2 (17 Modules)
               </p>
             </div>
           </div>

@@ -63,32 +63,45 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
             </Link>
           </div>
 
-          {/* Center Links (Desktop Public Header Links) */}
-          <div className="hidden md:flex items-center space-x-1">
+          {/* Center Links (Desktop Header Quick Navigation) */}
+          <div className="hidden md:flex items-center space-x-1 text-xs">
+            <Link
+              to={isPublic ? '/login' : (isAuthenticated ? '/live-scan' : '/login')}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+            >
+              <span className="w-2 h-2 rounded-full bg-safety-500 animate-ping" />
+              Live Scanner
+            </Link>
+            <Link
+              to={isPublic ? '/login' : (isAuthenticated ? '/ai-detection' : '/login')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-brand-500" />
+              AI Workbench
+            </Link>
             <Link
               to={isPublic ? '/login' : (isAuthenticated ? '/map' : '/login')}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
             >
-              <MapPin className="w-4 h-4 text-safety-500" />
-              Live Map
-            </Link>
-            <Link
-              to={isPublic ? '/login' : (isAuthenticated ? '/safe-route' : '/login')}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
-            >
-              <Sparkles className="w-4 h-4 text-brand-500" />
-              Safe Route Planner
-            </Link>
-            <Link
-              to={isPublic ? '/login' : (isAuthenticated ? '/dashboard' : '/login')}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
-            >
-              Dashboard
+              <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+              RQI Map
             </Link>
           </div>
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-2">
+
+            {/* Quick Role Switcher Button */}
+            {isAuthenticated && (
+              <button
+                onClick={toggleRole}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-[11px] border border-amber-500/20 hover:bg-amber-500/20 transition"
+                title="Switch between Citizen User mode and Municipality Admin mode"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Mode: {user?.role === 'admin' ? 'Municipality Admin' : 'Citizen User'}</span>
+              </button>
+            )}
 
             {/* Dark / Light Toggle */}
             <button
