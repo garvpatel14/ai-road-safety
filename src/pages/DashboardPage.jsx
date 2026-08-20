@@ -17,7 +17,6 @@ import {
   ExternalLink,
   Eye,
   Camera,
-  Cpu,
   Radio,
   Sparkles,
   FileText,
@@ -30,7 +29,6 @@ export const DashboardPage = () => {
 
   const quickTools = [
     { name: 'Live Road Scan', path: '/live-scan', icon: Camera, color: 'text-safety-500 bg-safety-500/10', desc: 'Real-time camera scanner HUD' },
-    { name: 'AI Detection Studio', path: '/ai-detection', icon: Cpu, color: 'text-brand-500 bg-brand-500/10', desc: 'Deep neural net defect analyzer' },
     { name: 'GPS Drive Telemetry', path: '/gps-location', icon: Radio, color: 'text-emerald-500 bg-emerald-500/10', desc: 'GNSS lock & drive tracker' },
     { name: 'Road Quality Map', path: '/map', icon: Activity, color: 'text-purple-500 bg-purple-500/10', desc: 'RQI surface condition heatmap' },
     { name: 'Safe Route Planner', path: '/safe-route', icon: Navigation, color: 'text-amber-500 bg-amber-500/10', desc: 'Zero-hazard AI route planner' },
@@ -57,12 +55,6 @@ export const DashboardPage = () => {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-safety-600 to-brand-600 text-white font-extrabold text-xs shadow-md hover:opacity-95 transition"
           >
             <Camera className="w-4 h-4" /> Start Live Scan
-          </Link>
-          <Link
-            to="/ai-detection"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-panel text-slate-800 dark:text-white font-extrabold text-xs border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-          >
-            <Cpu className="w-4 h-4 text-brand-500" /> AI Workbench
           </Link>
         </div>
       </div>

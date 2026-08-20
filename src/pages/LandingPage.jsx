@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -11,25 +11,14 @@ import {
   TrendingUp,
   Award,
   Users,
-  Send,
   Camera,
   Cpu,
   Layers
 } from 'lucide-react';
-import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 
 export const LandingPage = () => {
-  const { addToast } = useNotifications();
   const { isAuthenticated } = useAuth();
-  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleContactSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-    addToast('Thank you for contacting SafeRoad AI team! We will respond shortly.', 'success');
-  };
 
   return (
     <div className="space-y-24 pb-20">
@@ -219,101 +208,6 @@ export const LandingPage = () => {
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{item.desc}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* 5. TEAM SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-            Meet the Engineering & Safety Team
-          </h2>
-          <p className="text-slate-600 dark:text-slate-300 text-sm">
-            Experts in Computer Vision, Geospatial AI, and Civil Infrastructure Engineering.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { name: 'Dr. Aris Thorne', role: 'Chief AI Architect', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Elena Rostova', role: 'Head of Geospatial Systems', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80' },
-            { name: 'David Miller', role: 'Lead Computer Vision Eng', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Sarah Connor', role: 'Smart Infrastructure Director', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80' },
-          ].map((person, i) => (
-            <div key={i} className="glass-card rounded-2xl overflow-hidden text-center p-5 space-y-3 border border-slate-200 dark:border-slate-800">
-              <img src={person.image} alt={person.name} className="w-24 h-24 rounded-full mx-auto object-cover ring-4 ring-brand-500/20" />
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-base">{person.name}</h4>
-                <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">{person.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 6. CONTACT SECTION */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="glass-panel rounded-3xl p-8 sm:p-12 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-              Get in Touch with Our Safety Engineers
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-              Interested in municipal integration or custom deployment for your state/city?
-            </p>
-          </div>
-
-          {submitted ? (
-            <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2">
-              <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto" />
-              <h3 className="text-lg font-bold text-emerald-700 dark:text-emerald-400">Message Received!</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300">Our smart city liaison will contact you within 24 hours.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleContactSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Your Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    placeholder="e.g. Inspector John Doe"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    required
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    placeholder="john@citydepartment.gov"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Message / Inquiry</label>
-                <textarea
-                  rows={4}
-                  required
-                  value={contactForm.message}
-                  onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                  placeholder="How can we assist your city road safety initiative?"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-safety-500 text-white font-bold text-sm shadow-lg hover:opacity-95 transition flex items-center justify-center gap-2"
-              >
-                <Send className="w-4 h-4" /> Send Message
-              </button>
-            </form>
-          )}
         </div>
       </section>
 

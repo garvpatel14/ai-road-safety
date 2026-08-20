@@ -10,7 +10,6 @@ const RegisterPage = lazy(() => import('../pages/RegisterPage').then(m => ({ def
 
 // User Side Pages
 const LiveRoadScanningPage = lazy(() => import('../pages/LiveRoadScanningPage').then(m => ({ default: m.LiveRoadScanningPage })));
-const AiDetectionPage = lazy(() => import('../pages/AiDetectionPage').then(m => ({ default: m.AiDetectionPage })));
 const GpsLocationPage = lazy(() => import('../pages/GpsLocationPage').then(m => ({ default: m.GpsLocationPage })));
 const InteractiveMapPage = lazy(() => import('../pages/InteractiveMapPage').then(m => ({ default: m.InteractiveMapPage })));
 const SafeRoutePage = lazy(() => import('../pages/SafeRoutePage').then(m => ({ default: m.SafeRoutePage })));
@@ -61,7 +60,6 @@ export const AppRoutes = () => {
           {/* User Side Modules */}
           <Route path="/dashboard" element={<Navigate to="/live-scan" replace />} />
           <Route path="/live-scan" element={<LiveRoadScanningPage />} />
-          <Route path="/ai-detection" element={<AiDetectionPage />} />
           <Route path="/gps-location" element={<GpsLocationPage />} />
           <Route path="/map" element={<InteractiveMapPage />} />
           <Route path="/safe-route" element={<SafeRoutePage />} />
