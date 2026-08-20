@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, StatCard } from '../components/common/Card';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { MOCK_WORK_ORDERS } from '../utils/mockData';
 import { useNotifications } from '../context/NotificationContext';
+import api from '../services/api';
 import {
   Wrench,
   PlusCircle,
@@ -13,7 +14,8 @@ import {
   Clock,
   UserCheck,
   Building,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
 import { Modal } from '../components/common/Modal';
 
@@ -21,50 +23,99 @@ export const RepairManagementPage = () => {
   const { addToast } = useNotifications();
 
   const [workOrders, setWorkOrders] = useState(MOCK_WORK_ORDERS);
+  const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOrder, setNewOrder] = useState({
     title: '',
-    crewAssigned: 'Alpha Crew #4',
+    crewAssigned: 'Alpha Crew #4 (Cold Mix Team)',
     contractor: 'Apex Infrastructure Ltd.',
     estimatedCost: '$4,500',
     completionTarget: '2026-08-20'
   });
 
-  const handleCreateOrder = (e) => {
-    e.preventDefault();
-    if (!newOrder.title.trim()) return;
-    const created = {
-      id: `WO-${Math.floor(8800 + Math.random() * 900)}`,
-      reportId: 'REP-1001',
-      title: newOrder.title,
-      crewAssigned: newOrder.crewAssigned,
-      contractor: newOrder.contractor,
-      estimatedCost: newOrder.estimatedCost,
-      status: 'Scheduled',
-      startDate: new Date().toISOString().split('T')[0],
-      completionTarget: newOrder.completionTarget,
-      progressPct: 0,
-      beforeImage: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
-      afterImage: null
-    };
-
-    setWorkOrders([created, ...workOrders]);
-    setShowCreateModal(false);
-    addToast(`Work Order ${created.id} created and dispatched!`, 'success');
+  const fetchWorkOrders = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/admin/work-orders');
+      if (res.data?.workOrders && res.data.workOrders.length > 0) {
+        setWorkOrders(res.data.workOrders);
+      }
+    } catch (err) {
+      console.warn('Fallback work orders:', err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePromoteStage = (id) => {
+  useEffect(() => {
+    fetchWorkOrders();
+  }, []);
+
+  const handleCreateOrder = async (e) => {
+    e.preventDefault();
+    if (!newOrder.title.trim()) return;
+
+    try {
+      const res = await api.post('/admin/work-orders', {
+        title: newOrder.title,
+        crewAssigned: newOrder.crewAssigned,
+        contractor: newOrder.contractor,
+        estimatedCost: newOrder.estimatedCost,
+        startDate: new Date().toISOString().split('T')[0],
+        completionTarget: newOrder.completionTarget,
+        beforeImage: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+      });
+
+      if (res.data?.workOrder) {
+        setWorkOrders([res.data.workOrder, ...workOrders]);
+      }
+      setShowCreateModal(false);
+      addToast(`Work Order created and dispatched!`, 'success');
+    } catch (err) {
+      const created = {
+        id: `WO-${Math.floor(8800 + Math.random() * 900)}`,
+        reportId: 'REP-1001',
+        title: newOrder.title,
+        crewAssigned: newOrder.crewAssigned,
+        contractor: newOrder.contractor,
+        estimatedCost: newOrder.estimatedCost,
+        status: 'Scheduled',
+        startDate: new Date().toISOString().split('T')[0],
+        completionTarget: newOrder.completionTarget,
+        progressPct: 0,
+        beforeImage: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+        afterImage: null
+      };
+      setWorkOrders([created, ...workOrders]);
+      setShowCreateModal(false);
+      addToast(`Work Order ${created.id} created and dispatched!`, 'success');
+    }
+  };
+
+  const handlePromoteStage = async (id) => {
+    const current = workOrders.find(w => w.id === id);
+    if (!current) return;
+    const nextStatus = current.status === 'Scheduled' ? 'In Progress' : 'Completed';
+    const nextProgress = nextStatus === 'In Progress' ? 65 : 100;
+
     setWorkOrders(prev =>
       prev.map(wo => {
         if (wo.id === id) {
-          const nextStatus = wo.status === 'Scheduled' ? 'In Progress' : 'Completed';
-          const nextProgress = nextStatus === 'In Progress' ? 65 : 100;
           return { ...wo, status: nextStatus, progressPct: nextProgress };
         }
         return wo;
       })
     );
-    addToast('Work Order stage updated.', 'info');
+
+    try {
+      await api.put(`/admin/work-orders/${id}`, {
+        status: nextStatus,
+        progressPct: nextProgress
+      });
+      addToast(`Work Order ${id} advanced to ${nextStatus}.`, 'info');
+    } catch (err) {
+      addToast('Work Order stage updated locally.', 'info');
+    }
   };
 
   return (

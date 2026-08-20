@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, StatCard } from '../components/common/Card';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { RoadHazardDetailsModal } from '../components/common/RoadHazardDetailsModal';
 import { INITIAL_REPORTS } from '../utils/mockData';
 import { useNotifications } from '../context/NotificationContext';
+import api from '../services/api';
 import {
   FileText,
   Search,
@@ -15,22 +16,43 @@ import {
   CheckCircle,
   Eye,
   Trash2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 
 export const PotholeManagementPage = () => {
   const { addToast } = useNotifications();
 
   const [reports, setReports] = useState(INITIAL_REPORTS);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [severityFilter, setSeverityFilter] = useState('All');
   const [selectedReport, setSelectedReport] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
 
+  const fetchReports = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/reports');
+      if (res.data?.reports) {
+        setReports(res.data.reports);
+      }
+    } catch (err) {
+      console.warn('Fallback reports:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
   // Filter logic
   const filteredReports = reports.filter(r => {
-    const matchesSearch = r.id.toLowerCase().includes(searchQuery.toLowerCase()) || r.locationName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = r.id.toLowerCase().includes(searchQuery.toLowerCase()) || (r.locationName || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'All' || r.status === statusFilter;
     const matchesSeverity = severityFilter === 'All' || r.severity === severityFilter;
     return matchesSearch && matchesStatus && matchesSeverity;
@@ -52,10 +74,17 @@ export const PotholeManagementPage = () => {
     }
   };
 
-  const handleBulkStatusChange = (newStatus) => {
+  const handleBulkStatusChange = async (newStatus) => {
     if (selectedIds.length === 0) return;
     setReports(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: newStatus } : r));
     addToast(`Updated status to '${newStatus}' for ${selectedIds.length} selected items.`, 'success');
+    
+    // Send to backend
+    for (const id of selectedIds) {
+      try {
+        await api.put(`/reports/${id}/status`, { status: newStatus });
+      } catch (e) {}
+    }
     setSelectedIds([]);
   };
 

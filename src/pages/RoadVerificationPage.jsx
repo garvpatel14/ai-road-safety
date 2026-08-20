@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, StatCard } from '../components/common/Card';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { MOCK_VERIFICATION_QUEUE } from '../utils/mockData';
 import { useNotifications } from '../context/NotificationContext';
+import api from '../services/api';
 import {
   CheckCircle2,
   XCircle,
@@ -13,30 +14,72 @@ import {
   Ruler,
   AlertTriangle,
   Send,
-  UserCheck
+  UserCheck,
+  Loader2
 } from 'lucide-react';
 
 export const RoadVerificationPage = () => {
   const { addToast } = useNotifications();
 
   const [queue, setQueue] = useState(MOCK_VERIFICATION_QUEUE);
-  const [selectedItem, setSelectedItem] = useState(queue[0] || null);
+  const [loading, setLoading] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [officerNote, setOfficerNote] = useState('');
 
-  const handleApprove = (id) => {
-    setQueue(prev => prev.filter(item => item.id !== id));
-    if (selectedItem?.id === id) {
-      setSelectedItem(queue.find(item => item.id !== id) || null);
+  const fetchQueue = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/admin/verification-queue');
+      if (res.data?.queue && res.data.queue.length > 0) {
+        setQueue(res.data.queue);
+        setSelectedItem(res.data.queue[0]);
+      } else {
+        setSelectedItem(queue[0]);
+      }
+    } catch (err) {
+      console.warn('Fallback verification queue:', err.message);
+      setSelectedItem(queue[0]);
+    } finally {
+      setLoading(false);
     }
-    addToast(`Verified & Approved item ${id}! Escalated to Work Order Dispatch.`, 'success');
   };
 
-  const handleReject = (id) => {
+  useEffect(() => {
+    fetchQueue();
+  }, []);
+
+  const handleApprove = async (id) => {
     setQueue(prev => prev.filter(item => item.id !== id));
     if (selectedItem?.id === id) {
       setSelectedItem(queue.find(item => item.id !== id) || null);
     }
-    addToast(`Item ${id} dismissed as False Positive / Low Priority.`, 'warning');
+
+    try {
+      await api.put(`/admin/verification-queue/${id}`, {
+        action: 'approve',
+        inspectionNotes: officerNote || 'Civil engineer verified.'
+      });
+      addToast(`Verified & Approved item ${id}! Escalated to Work Order Dispatch.`, 'success');
+    } catch (err) {
+      addToast(`Verified & Approved item ${id}! (local state)`, 'success');
+    }
+  };
+
+  const handleReject = async (id) => {
+    setQueue(prev => prev.filter(item => item.id !== id));
+    if (selectedItem?.id === id) {
+      setSelectedItem(queue.find(item => item.id !== id) || null);
+    }
+
+    try {
+      await api.put(`/admin/verification-queue/${id}`, {
+        action: 'reject',
+        inspectionNotes: officerNote || 'Rejected as false positive.'
+      });
+      addToast(`Item ${id} dismissed as False Positive / Low Priority.`, 'warning');
+    } catch (err) {
+      addToast(`Item ${id} dismissed.`, 'warning');
+    }
   };
 
   return (

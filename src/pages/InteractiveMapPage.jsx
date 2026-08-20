@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeafletMap } from '../components/maps/LeafletMap';
 import { INITIAL_REPORTS, MOCK_RQI_SEGMENTS } from '../utils/mockData';
 import { RoadHazardDetailsModal } from '../components/common/RoadHazardDetailsModal';
+import api from '../services/api';
 import {
   Filter,
   MapPin,
@@ -10,18 +11,46 @@ import {
   RefreshCw,
   Search,
   Activity,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 import { Card } from '../components/common/Card';
 
 export const InteractiveMapPage = () => {
-  const [reports] = useState(INITIAL_REPORTS);
+  const [reports, setReports] = useState(INITIAL_REPORTS);
+  const [rqiSegments, setRqiSegments] = useState(MOCK_RQI_SEGMENTS);
+  const [loading, setLoading] = useState(false);
   const [typeFilter, setTypeFilter] = useState('All');
   const [severityFilter, setSeverityFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [showRqiLayer, setShowRqiLayer] = useState(true);
   const [selectedHazard, setSelectedHazard] = useState(null);
+
+  const fetchMapData = async () => {
+    setLoading(true);
+    try {
+      const [reportsRes, rqiRes] = await Promise.allSettled([
+        api.get('/reports'),
+        api.get('/map/rqi-segments'),
+      ]);
+
+      if (reportsRes.status === 'fulfilled' && reportsRes.value.data?.reports) {
+        setReports(reportsRes.value.data.reports);
+      }
+      if (rqiRes.status === 'fulfilled' && rqiRes.value.data?.segments) {
+        setRqiSegments(rqiRes.value.data.segments);
+      }
+    } catch (err) {
+      console.warn('Map data fallback:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMapData();
+  }, []);
 
   // Filter Reports Logic
   const filteredReports = reports.filter((r) => {
@@ -175,7 +204,7 @@ export const InteractiveMapPage = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {MOCK_RQI_SEGMENTS.map(rqi => (
+            {rqiSegments.map(rqi => (
               <div key={rqi.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700">
                 <span className="font-semibold text-slate-300">{rqi.name}:</span>
                 <span className={`font-extrabold ${rqi.status === 'Good' ? 'text-emerald-400' : rqi.status === 'Fair' ? 'text-amber-400' : 'text-red-400'}`}>

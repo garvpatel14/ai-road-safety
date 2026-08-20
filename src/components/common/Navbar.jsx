@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   Menu,
   X,
-  Sparkles,
   MapPin,
   CheckCircle2
 } from 'lucide-react';
@@ -73,13 +72,6 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
               Live Scanner
             </Link>
             <Link
-              to={isPublic ? '/login' : (isAuthenticated ? '/ai-detection' : '/login')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-brand-500" />
-              AI Workbench
-            </Link>
-            <Link
               to={isPublic ? '/login' : (isAuthenticated ? '/map' : '/login')}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
             >
@@ -91,17 +83,7 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
           {/* Right Action Icons */}
           <div className="flex items-center gap-2">
 
-            {/* Quick Role Switcher Button */}
-            {isAuthenticated && (
-              <button
-                onClick={toggleRole}
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-[11px] border border-amber-500/20 hover:bg-amber-500/20 transition"
-                title="Switch between Citizen User mode and Municipality Admin mode"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Mode: {user?.role === 'admin' ? 'Municipality Admin' : 'Citizen User'}</span>
-              </button>
-            )}
+
 
             {/* Dark / Light Toggle */}
             <button

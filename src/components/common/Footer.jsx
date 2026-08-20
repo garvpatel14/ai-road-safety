@@ -32,7 +32,7 @@ export const Footer = () => {
           <div>
             <h4 className="text-sm font-semibold text-white mb-3">Platform Views</h4>
             <ul className="space-y-2 text-xs">
-              <li><Link to="/dashboard" className="hover:text-white transition">Analytics Dashboard</Link></li>
+              <li><Link to="/live-scan" className="hover:text-white transition">Live Road Scanner</Link></li>
               <li><Link to="/map" className="hover:text-white transition">Interactive Hazard Map</Link></li>
               <li><Link to="/safe-route" className="hover:text-white transition">Safe Route Planner</Link></li>
               <li><Link to="/analytics" className="hover:text-white transition">Road Trends & Insights</Link></li>

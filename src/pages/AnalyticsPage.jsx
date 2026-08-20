@@ -1,11 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../components/common/Card';
 import { MonthlyTrendChart, DamageDistributionChart, RepairProgressBarChart } from '../components/charts/DashboardCharts';
 import { ANALYTICS_DATA } from '../utils/mockData';
-import { BarChart3, AlertOctagon, TrendingUp, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { BarChart3, AlertOctagon, TrendingUp, CheckCircle2, ShieldAlert, Loader2 } from 'lucide-react';
 import { StatusBadge } from '../components/common/StatusBadge';
+import api from '../services/api';
 
 export const AnalyticsPage = () => {
+  const [highRiskZones, setHighRiskZones] = useState(ANALYTICS_DATA.highRiskZones);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/analytics/stats');
+        if (res.data?.highRiskZones && res.data.highRiskZones.length > 0) {
+          setHighRiskZones(res.data.highRiskZones);
+        }
+      } catch (err) {
+        console.warn('Analytics fallback:', err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
   return (
     <div className="space-y-8 pb-12">
       
@@ -81,7 +101,7 @@ export const AnalyticsPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {ANALYTICS_DATA.highRiskZones.map((zone, idx) => (
+                {highRiskZones.map((zone, idx) => (
                   <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
                     <td className="p-3 font-bold text-slate-900 dark:text-white">{zone.zone}</td>
                     <td className="p-3">

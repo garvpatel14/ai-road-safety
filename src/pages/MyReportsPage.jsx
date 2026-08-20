@@ -1,14 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { INITIAL_REPORTS } from '../utils/mockData';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { Card } from '../components/common/Card';
 import { Modal } from '../components/common/Modal';
-import { FileText, Eye, MapPin, Calendar, ThumbsUp, PlusCircle } from 'lucide-react';
+import { FileText, Eye, MapPin, Calendar, ThumbsUp, PlusCircle, RefreshCw, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
+import { useNotifications } from '../context/NotificationContext';
 
 export const MyReportsPage = () => {
   const [reports, setReports] = useState(INITIAL_REPORTS);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { addToast } = useNotifications();
+
+  const fetchReports = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/reports');
+      if (res.data?.reports && res.data.reports.length > 0) {
+        setReports(res.data.reports);
+      }
+    } catch (err) {
+      console.warn('Fallback to local reports:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const handleUpvote = async (id, e) => {
+    e.stopPropagation();
+    try {
+      const res = await api.post(`/reports/${id}/upvote`);
+      setReports(prev => prev.map(r => r.id === id ? { ...r, upvotes: res.data.upvotes } : r));
+      addToast('Upvoted report!', 'success');
+    } catch (err) {
+      setReports(prev => prev.map(r => r.id === id ? { ...r, upvotes: (r.upvotes || 0) + 1 } : r));
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -87,9 +120,12 @@ export const MyReportsPage = () => {
 
                   {/* Upvotes */}
                   <td className="p-4 text-center">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold">
-                      <ThumbsUp className="w-3 h-3" /> {r.upvotes}
-                    </span>
+                    <button
+                      onClick={(e) => handleUpvote(r.id, e)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold hover:bg-brand-500/20 transition cursor-pointer"
+                    >
+                      <ThumbsUp className="w-3.5 h-3.5" /> {r.upvotes || 0}
+                    </button>
                   </td>
 
                   {/* Action */}

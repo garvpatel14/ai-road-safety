@@ -29,7 +29,7 @@ export const RegisterPage = () => {
     setError('');
     register(name, email, password);
     addToast('Account registered successfully! Welcome aboard.', 'success');
-    navigate('/dashboard');
+    navigate('/live-scan');
   };
 
   return (
