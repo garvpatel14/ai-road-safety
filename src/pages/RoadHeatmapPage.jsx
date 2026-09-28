@@ -26,7 +26,7 @@ export const RoadHeatmapPage = () => {
   const [intensity, setIntensity] = useState('High Density');
   const [isExporting, setIsExporting] = useState(false);
 
-  const districts = ['All Districts', 'Central Commercial', 'North Bay Ward', 'Sunset District', 'Skyline Hills'];
+  const districts = ['All Districts', 'Anand Town Central', 'Amul Industrial Zone', 'Vidyanagar Education Hub', 'Karamsad Ward', 'Southern Bypass', 'Northern Ring Road'];
 
   useEffect(() => {
     const fetchHeatmapData = async () => {

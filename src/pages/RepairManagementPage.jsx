@@ -27,10 +27,10 @@ export const RepairManagementPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOrder, setNewOrder] = useState({
     title: '',
-    crewAssigned: 'Alpha Crew #4 (Cold Mix Team)',
-    contractor: 'Apex Infrastructure Ltd.',
-    estimatedCost: '$4,500',
-    completionTarget: '2026-08-20'
+    crewAssigned: 'AUDA Rapid Road Unit #2 (Cold Mix Team)',
+    contractor: 'Charotar Infrastructure Pvt Ltd',
+    estimatedCost: '₹3,45,000',
+    completionTarget: '2026-09-30'
   });
 
   const fetchWorkOrders = async () => {
@@ -157,7 +157,7 @@ export const RepairManagementPage = () => {
         />
         <StatCard
           title="Est. Budget Allocated"
-          value="$24,500"
+          value="₹31,95,000"
           icon={DollarSign}
           color="emerald"
         />

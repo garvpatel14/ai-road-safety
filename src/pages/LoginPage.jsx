@@ -2,52 +2,70 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { ShieldAlert, Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
+import { ShieldAlert, Mail, Lock, LogIn, CheckCircle } from 'lucide-react';
 import { Modal } from '../components/common/Modal';
+import api from '../services/api';
 
 export const LoginPage = () => {
-  const { login, googleLogin } = useAuth();
+  const { login } = useAuth();
   const { addToast } = useNotifications();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('alex.morgan@saferoad.ai');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const loggedUser = login(email, password, rememberMe);
-    addToast('Welcome back to SafeRoad AI Platform!', 'success');
-    if (loggedUser?.role === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/live-scan');
+    setError('');
+    setLoading(true);
+    try {
+      const loggedUser = await login(email, password, rememberMe);
+      addToast('Welcome back to SafeRoad AI Platform!', 'success');
+      if (loggedUser?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError(err.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    const loggedUser = googleLogin();
-    addToast('Signed in securely with Google OAuth 2.0', 'success');
-    if (loggedUser?.role === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/live-scan');
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotLoading(true);
+    try {
+      await api.post('/auth/forgot-password', { email: forgotEmail });
+      setForgotSent(true);
+    } catch (err) {
+      setForgotError(err?.response?.data?.error || 'Something went wrong. Please try again.');
+    } finally {
+      setForgotLoading(false);
     }
   };
 
-  const handleForgotSubmit = (e) => {
-    e.preventDefault();
-    addToast(`Password reset instructions sent to ${forgotEmail}`, 'info');
+  const handleCloseForgotModal = () => {
     setShowForgotModal(false);
     setForgotEmail('');
+    setForgotError('');
+    setForgotSent(false);
   };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md glass-panel rounded-3xl p-8 border border-slate-200/80 dark:border-slate-800 shadow-2xl space-y-6">
-        
+
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-safety-500 text-white shadow-lg mb-1">
@@ -55,40 +73,6 @@ export const LoginPage = () => {
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Welcome Back</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">Sign in to access your road safety intelligence portal</p>
-        </div>
-
-        {/* Google Login Button */}
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="w-full py-2.5 px-4 rounded-xl glass-card flex items-center justify-center gap-3 border border-slate-300 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
-            <path
-              fill="#4285F4"
-              d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-            />
-            <path
-              fill="#34A853"
-              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.29v3.15C3.26 21.3 7.35 24 12 24z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.29C.47 8.21 0 10.05 0 12s.47 3.79 1.29 5.42l3.99-3.15z"
-            />
-            <path
-              fill="#EA4335"
-              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.7 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-            />
-          </svg>
-          Continue with Google
-        </button>
-
-        <div className="relative flex items-center justify-center my-4">
-          <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
-          <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest absolute">
-            OR EMAIL
-          </span>
         </div>
 
         {/* Login Form */}
@@ -144,11 +128,18 @@ export const LoginPage = () => {
             </label>
           </div>
 
+          {error && (
+            <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-safety-500 text-white font-bold text-sm shadow-lg shadow-brand-500/20 hover:opacity-95 transition flex items-center justify-center gap-2"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-safety-500 text-white font-bold text-sm shadow-lg shadow-brand-500/20 hover:opacity-95 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <LogIn className="w-4 h-4" /> Sign In
+            <LogIn className="w-4 h-4" /> {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
@@ -164,41 +155,77 @@ export const LoginPage = () => {
       {/* Forgot Password Modal */}
       <Modal
         isOpen={showForgotModal}
-        onClose={() => setShowForgotModal(false)}
+        onClose={handleCloseForgotModal}
         title="Reset Account Password"
       >
-        <form onSubmit={handleForgotSubmit} className="space-y-4">
-          <p className="text-xs text-slate-600 dark:text-slate-300">
-            Enter your registered email address and we'll send a secure password reset link.
-          </p>
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-            <input
-              type="email"
-              required
-              value={forgotEmail}
-              onChange={(e) => setForgotEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-              placeholder="name@domain.com"
-            />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
+        {forgotSent ? (
+          /* ── Success state ── */
+          <div className="flex flex-col items-center gap-4 py-4 text-center">
+            <div className="w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <CheckCircle className="w-7 h-7 text-green-500" />
+            </div>
+            <div>
+              <p className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1">Check your inbox!</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                If <strong>{forgotEmail}</strong> is registered, a password reset link has been sent.
+                The link expires in <strong>1 hour</strong>.
+              </p>
+            </div>
+            <p className="text-[11px] text-slate-400">Didn't receive it? Check your spam folder.</p>
             <button
-              type="button"
-              onClick={() => setShowForgotModal(false)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              onClick={handleCloseForgotModal}
+              className="mt-1 px-5 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-500 transition"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-500"
-            >
-              Send Reset Link
+              Back to Login
             </button>
           </div>
-        </form>
+        ) : (
+          /* ── Form state ── */
+          <form onSubmit={handleForgotSubmit} className="space-y-4">
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Enter your registered email address and we'll send you a secure password reset link.
+            </p>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                <input
+                  type="email"
+                  required
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  placeholder="name@domain.com"
+                />
+              </div>
+            </div>
+
+            {forgotError && (
+              <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                {forgotError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleCloseForgotModal}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={forgotLoading}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white hover:bg-brand-500 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+              </button>
+            </div>
+          </form>
+        )}
       </Modal>
+
     </div>
   );
 };

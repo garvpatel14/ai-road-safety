@@ -204,17 +204,31 @@ async function initializeDatabase() {
       );
     `);
 
+    // Password Reset Tokens Table
+    await appPool.query(`
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(150) NOT NULL,
+        token VARCHAR(255) UNIQUE NOT NULL,
+        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     console.log('Tables created. Now seeding seed data...');
 
     // Seed Users
     const userCount = await appPool.query('SELECT COUNT(*) FROM users');
     if (parseInt(userCount.rows[0].count, 10) === 0) {
       const defaultPasswordHash = await bcrypt.hash('password123', 10);
+      const garvPasswordHash = await bcrypt.hash('garv@admin2026', 10);
+      const mihirPasswordHash = await bcrypt.hash('mihir@admin2026', 10);
+      
       const initialUsers = [
         ['USR-1', 'Alex Morgan', 'alex.morgan@saferoad.ai', defaultPasswordHash, 'user', 'Active', 18, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'],
         ['USR-2', 'Sarah Connor', 'sarah.c@saferoad.ai', defaultPasswordHash, 'user', 'Active', 42, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80'],
-        ['USR-3', 'Marcus Vance (Admin)', 'marcus.v@saferoad.ai', defaultPasswordHash, 'admin', 'Active', 95, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'],
-        ['USR-4', 'Garv Patel', 'garv@saferoad.ai', defaultPasswordHash, 'admin', 'Active', 50, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'],
+        ['USR-3', 'Garv Patel', 'garv@saferoad.ai', garvPasswordHash, 'admin', 'Active', 127, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'],
+        ['USR-4', 'Mihir Shah', 'mihir@saferoad.ai', mihirPasswordHash, 'admin', 'Active', 98, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80'],
       ];
 
       for (const u of initialUsers) {
@@ -225,19 +239,21 @@ async function initializeDatabase() {
           u
         );
       }
-      console.log('Seeded initial users.');
+      console.log('Seeded initial users with admin accounts for Garv and Mihir.');
     }
 
     // Seed Damage Reports
     const repCount = await appPool.query('SELECT COUNT(*) FROM damage_reports');
     if (parseInt(repCount.rows[0].count, 10) === 0) {
       const reports = [
-        ['REP-1001', 'Pothole', 'High', 'Pending', 'Deep pothole in middle of lane causing severe traffic deceleration & risk of wheel damage.', 'Main St & 4th Ave, Downtown', 37.7749, -122.4194, '2026-07-30', '14:22', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'Alex Morgan', '98%', 24, 14.2, 45.0, 0.16, 88, 'Central Commercial', 0],
-        ['REP-1002', 'Crack', 'Medium', 'Under Review', 'Long longitudinal asphalt crack expanding along the bike lane edge.', 'Oakland Blvd Near Bridge', 37.7833, -122.4167, '2026-07-29', '09:15', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', 'Sarah Connor', '92%', 12, 4.5, 12.0, 1.25, 54, 'North Bay Ward', 0],
-        ['REP-1003', 'Accident', 'Critical', 'Scheduled', 'Two-vehicle side collision near intersection. Emergency services notified.', 'Highway 101 North Exit 22B', 37.7650, -122.4200, '2026-07-31', '08:45', 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80', 'Traffic Cam AI #04', '99%', 45, 0, 0, 0, 96, 'Highway Corridor 101', 2],
-        ['REP-1004', 'Repair', 'Low', 'Resolved', 'Asphalt repaving and lane line re-striping completed by city maintenance crew.', 'Sunset Expressway Mile 14', 37.7590, -122.4350, '2026-07-28', '16:00', 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80', 'Dept of Transport', '100%', 89, 0, 0, 12.0, 10, 'Sunset District', 0],
-        ['REP-1005', 'Pothole', 'Critical', 'In Progress', 'Multiple connected potholes creating hazardous driving condition for motorcycles.', 'Market Street & 8th St', 37.7780, -122.4120, '2026-07-30', '11:05', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'David Miller', '95%', 31, 18.5, 60.0, 0.45, 92, 'Central Commercial', 0],
-        ['REP-1006', 'Erosion', 'High', 'Pending', 'Shoulder erosion caused by heavy rains near curve ramp.', 'Skyline Drive South', 37.7400, -122.4500, '2026-07-31', '10:30', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', 'Elena Rostova', '91%', 18, 22.0, 110.0, 2.80, 78, 'Skyline Hills', 0],
+        ['REP-1001', 'Pothole', 'High', 'Pending', 'Deep road crater near railway junction causing severe traffic deceleration and risk of wheel rim damage.', 'Station Road, Near Anand Railway Station, Anand', 22.5606, 72.9575, '2026-09-24', '14:22', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'Garv Patel', '98%', 38, 15.2, 48.0, 0.18, 92, 'Anand Town Central', 0],
+        ['REP-1002', 'Pothole', 'Critical', 'In Progress', 'Severe pothole cluster across both lanes near Amul Chocolate Plant entrance.', 'Amul Dairy Road, Anand', 22.5535, 72.9515, '2026-09-25', '09:15', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'Mihir Shah', '96%', 45, 18.5, 62.0, 0.42, 96, 'Amul Industrial Zone', 0],
+        ['REP-1003', 'Crack', 'Medium', 'Under Review', 'Long longitudinal crack expanding along the busy commercial market corridor.', 'Nana Bazar, Tower Road, Anand', 22.5595, 72.9460, '2026-09-23', '11:40', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', 'Kunal Joshi', '92%', 14, 4.8, 14.0, 1.10, 58, 'Old Anand Market', 0],
+        ['REP-1004', 'Pothole', 'High', 'Pending', 'Sharp-edged pothole on highway junction causing sudden vehicle swerving.', 'Borsad Chokdi, Anand-Borsad Highway, Anand', 22.5400, 72.9320, '2026-09-25', '16:00', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'State Highway Patrol', '94%', 29, 14.0, 42.0, 0.16, 84, 'Southern Bypass', 0],
+        ['REP-1005', 'Crack', 'Medium', 'Under Review', 'Spiderweb alligator cracks near college campus roundabout.', 'Mota Bazar, Near BVM College, Vallabh Vidyanagar, Anand', 22.5528, 72.9242, '2026-09-24', '08:30', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', 'Student Commuter Council', '91%', 21, 5.5, 35.0, 0.65, 66, 'Vidyanagar Education Hub', 0],
+        ['REP-1006', 'Repair', 'Low', 'Resolved', 'New micro-surfacing and lane re-marking completed by Anand Urban Development Authority.', '100 Feet Bypass Road, Anand', 22.5690, 72.9350, '2026-09-22', '17:00', 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80', 'AUDA Road Maintenance', '100%', 72, 0, 0, 45.0, 10, 'Northern Ring Road', 0],
+        ['REP-1007', 'Pothole', 'Critical', 'Pending', 'Massive rainwater-filled crater near overbridge descent with zero street lighting.', 'Gamdi Overbridge Approach, Anand', 22.5650, 72.9600, '2026-09-25', '20:15', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'Night Patrol AI Cam #2', '99%', 56, 22.0, 75.0, 0.55, 98, 'Eastern Anand', 0],
+        ['REP-1008', 'Pothole', 'High', 'Pending', 'Damaged asphalt trench on Sardar Patel Memorial approach avenue.', 'Memorial Road, Karamsad, Anand', 22.5475, 72.8988, '2026-09-25', '12:00', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'Heritage Trust Visitor', '95%', 19, 12.5, 38.0, 0.14, 76, 'Karamsad Ward', 0],
       ];
 
       for (const r of reports) {
@@ -257,22 +273,24 @@ async function initializeDatabase() {
       await appPool.query(`
         INSERT INTO report_comments (report_id, user_name, text)
         VALUES 
-          ('REP-1001', 'Sarah Connor', 'Damaged my tire rim yesterday night! Needs urgent repair.'),
-          ('REP-1001', 'City Inspector #12', 'Scheduled for emergency patching crew.'),
-          ('REP-1002', 'Cycling Guild', 'Hazardous for thin road bike tires.')
+          ('REP-1001', 'Ramesh Patel', 'Very risky for two-wheelers at night!'),
+          ('REP-1001', 'Anand Municipal Inspector', 'Patching team scheduled.'),
+          ('REP-1002', 'Dairy Milk Van Ops', 'Slows down tankers entering facility.')
+        ON CONFLICT DO NOTHING
       `);
 
-      console.log('Seeded initial damage reports with PostGIS geometries and comments.');
+      console.log('Seeded initial damage reports in Anand, Gujarat with PostGIS geometries.');
     }
 
     // Seed RQI Segments
     const rqiCount = await appPool.query('SELECT COUNT(*) FROM rqi_segments');
     if (parseInt(rqiCount.rows[0].count, 10) === 0) {
       const segments = [
-        ['RQI-1', 'Downtown Market St Corridor', 38, 'Poor', 37.7749, -122.4194, 37.7780, -122.4120],
-        ['RQI-2', 'Oakland Blvd Bridge Approach', 65, 'Fair', 37.7833, -122.4167, 37.7890, -122.4100],
-        ['RQI-3', 'Sunset Expressway Westbound', 92, 'Good', 37.7590, -122.4350, 37.7520, -122.4450],
-        ['RQI-4', 'Skyline Mountain Pass South', 52, 'Fair', 37.7400, -122.4500, 37.7320, -122.4600],
+        ['RQI-1', 'Station Road to Nana Bazar Corridor', 36, 'Poor', 22.5606, 72.9575, 22.5595, 72.9460],
+        ['RQI-2', 'Amul Dairy Industrial Highway', 48, 'Fair', 22.5535, 72.9515, 22.5400, 72.9320],
+        ['RQI-3', '100 Feet Bypass Smooth Ring Road', 94, 'Good', 22.5690, 72.9350, 22.5580, 72.9260],
+        ['RQI-4', 'Vidyanagar Double Road Education Corridor', 88, 'Good', 22.5580, 72.9260, 22.5528, 72.9242],
+        ['RQI-5', 'Karamsad Heritage Boulevard', 62, 'Fair', 22.5528, 72.9242, 22.5475, 72.8988],
       ];
 
       for (const s of segments) {
@@ -283,16 +301,17 @@ async function initializeDatabase() {
           s
         );
       }
-      console.log('Seeded RQI segments with PostGIS LineStrings.');
+      console.log('Seeded RQI segments in Anand, Gujarat with PostGIS LineStrings.');
     }
 
     // Seed Work Orders
     const woCount = await appPool.query('SELECT COUNT(*) FROM work_orders');
     if (parseInt(woCount.rows[0].count, 10) === 0) {
       const workOrders = [
-        ['WO-8801', 'REP-1005', 'Market St Emergency Asphalt Patching', 'Alpha Crew #4 (Cold Mix Team)', 'Apex Infrastructure Ltd.', '$3,800', 'In Progress', '2026-08-12', '2026-08-14', 65, 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80'],
-        ['WO-8802', 'REP-1003', 'Hwy 101 Guardrail & Surface Re-alignment', 'Highway Rapid Ops Unit', 'Bay Area Road Contractors', '$12,500', 'Scheduled', '2026-08-15', '2026-08-17', 15, 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80', null],
-        ['WO-8803', 'REP-1004', 'Sunset Expressway Repaving Section B', 'Heavy Machinery Paving Team B', 'City Public Works', '$8,200', 'Completed', '2026-07-26', '2026-07-28', 100, 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80'],
+        ['WO-ANAND-01', 'REP-ANAND-01', 'Station Road Junction Emergency Asphalt Patching', 'AUDA Rapid Road Unit #2 (Cold Mix Team)', 'Charotar Infrastructure Pvt Ltd', '₹3,45,000', 'In Progress', '2026-09-24', '2026-09-27', 70, 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80'],
+        ['WO-ANAND-02', 'REP-ANAND-02', 'Amul Dairy Highway Heavy Surface Re-alignment', 'District Heavy Machinery Paving Crew', 'Gujarat Highway Infra Ltd', '₹8,20,000', 'Scheduled', '2026-09-28', '2026-10-02', 20, 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', null],
+        ['WO-ANAND-03', 'REP-ANAND-04', 'Borsad Chokdi High-Stress Intersection Concrete Overhaul', 'AMC Special Highway Division', 'Anand Municipal Road Works', '₹14,50,000', 'In Progress', '2026-09-20', '2026-09-30', 55, 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', null],
+        ['WO-ANAND-04', 'REP-ANAND-08', '100 Feet Bypass Ring Road Micro-Surfacing & Lane Marking', 'AUDA Road Maintenance Unit', 'AUDA Engineering Division', '₹5,80,000', 'Completed', '2026-09-18', '2026-09-23', 100, 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80'],
       ];
 
       for (const wo of workOrders) {
@@ -303,15 +322,16 @@ async function initializeDatabase() {
           wo
         );
       }
-      console.log('Seeded initial work orders.');
+      console.log('Seeded initial work orders for Anand, Gujarat.');
     }
 
     // Seed Verification Queue
     const vCount = await appPool.query('SELECT COUNT(*) FROM verification_queue');
     if (parseInt(vCount.rows[0].count, 10) === 0) {
       const verifications = [
-        ['VER-401', 'REP-1001', 'Pothole', 0.98, '14.2 cm', '0.16 sq m', 'Pending Verification', 'High', 'Main St & 4th Ave, Downtown', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'AI model suggests high risk of vehicle axle breakdown due to sharp crater edge.'],
-        ['VER-402', 'REP-1006', 'Shoulder Erosion', 0.91, '22.0 cm', '2.80 sq m', 'Pending Verification', 'High', 'Skyline Drive South', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80', 'Heavy rain runoff washed away sub-grade support.']
+        ['VER-ANAND-01', 'REP-ANAND-01', 'Pothole', 0.98, '15.2 cm', '0.18 sq m', 'Pending Verification', 'High', 'Station Road, Near Anand Railway Station, Anand', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'AI Computer Vision verifies deep crater on approach to main railway terminal. Urgent patching recommended.'],
+        ['VER-ANAND-02', 'REP-ANAND-02', 'Pothole', 0.96, '18.5 cm', '0.42 sq m', 'Pending Verification', 'Critical', 'Amul Dairy Road, Anand', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'Sub-grade failure near industrial entry. Heavy vehicle traffic causing asphalt breakdown.'],
+        ['VER-ANAND-03', 'REP-ANAND-06', 'Pothole', 0.99, '22.0 cm', '0.55 sq m', 'Verified & Dispatched', 'Critical', 'Gamdi Overbridge Approach, Anand', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80', 'High-risk bridge approach crater. Warning cones deployed by municipal inspection team.']
       ];
 
       for (const v of verifications) {
@@ -322,17 +342,17 @@ async function initializeDatabase() {
           v
         );
       }
-      console.log('Seeded verification desk items.');
+      console.log('Seeded verification desk items for Anand.');
     }
 
     // Seed Notifications
     const nCount = await appPool.query('SELECT COUNT(*) FROM notifications');
     if (parseInt(nCount.rows[0].count, 10) === 0) {
       const notifs = [
-        ['NOT-1', 'Repair Completed', 'Work crew completed asphalt patching on Sunset Expressway Mile 14.', '10 mins ago', 'repair', false],
-        ['NOT-2', 'Dangerous Road Alert', 'High density of potholes reported near Market Street & 8th St. Drive with caution!', '1 hour ago', 'warning', false],
-        ['NOT-3', 'Accident Reported Nearby', 'Traffic collision reported on Hwy 101 Exit 22B. Alternative safe route recommended.', '3 hours ago', 'accident', true],
-        ['NOT-4', 'Report Status Update', 'Your report REP-1001 has been escalated to Priority Repair status.', '1 day ago', 'system', true],
+        ['NOT-ANAND-01', 'Repair Completed: 100 Feet Bypass', 'AUDA maintenance crew completed micro-surfacing and lane re-marking on 100 Feet Bypass Road, Anand.', '15 mins ago', 'repair', false],
+        ['NOT-ANAND-02', 'Road Hazard Alert: Borsad Chokdi', 'Deep pothole cluster detected near Borsad Chokdi intersection on Anand-Borsad Highway. Drive cautiously!', '1 hour ago', 'warning', false],
+        ['NOT-ANAND-03', 'Traffic Advisory: Station Road Junction', 'Traffic slowdown reported near Anand Railway Station due to municipal asphalt repair work. Safe alternative route suggested.', '2 hours ago', 'accident', true],
+        ['NOT-ANAND-04', 'Report Verified: Gamdi Overbridge', 'Your reported road defect at Gamdi Overbridge has been verified by the municipal desk and escalated for priority repair.', '1 day ago', 'system', true],
       ];
 
       for (const n of notifs) {
@@ -343,7 +363,7 @@ async function initializeDatabase() {
           n
         );
       }
-      console.log('Seeded initial notifications.');
+      console.log('Seeded initial notifications for Anand.');
     }
 
     console.log('Database initialization & seeding completed successfully!');

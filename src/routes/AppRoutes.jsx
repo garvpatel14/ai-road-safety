@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../components/common/LoadingSpinner';
 const LandingPage = lazy(() => import('../pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('../pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
 
 // User Side Pages
 const LiveRoadScanningPage = lazy(() => import('../pages/LiveRoadScanningPage').then(m => ({ default: m.LiveRoadScanningPage })));
@@ -28,6 +29,13 @@ const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage').then(m => ({ d
 
 import { useAuth } from '../context/AuthContext';
 
+/** Redirects unauthenticated users to /login */
+const PrivateRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+/** Redirects admin users away from user pages */
 const UserRoute = ({ children }) => {
   const { user } = useAuth();
   if (user?.role === 'admin') {
@@ -36,10 +44,11 @@ const UserRoute = ({ children }) => {
   return children;
 };
 
+/** Redirects non-admin users away from admin pages */
 const AdminRoute = ({ children }) => {
   const { user } = useAuth();
   if (user?.role !== 'admin') {
-    return <Navigate to="/live-scan" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   return children;
 };
@@ -53,14 +62,15 @@ export const AppRoutes = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         </Route>
 
-        {/* Main Dashboard & App Pages Layout */}
-        <Route element={<MainLayout />}>
+        {/* Main Dashboard & App Pages Layout — all require authentication */}
+        <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
           {/* User Side Modules */}
-          <Route path="/dashboard" element={<Navigate to="/live-scan" replace />} />
-          <Route path="/live-scan" element={<LiveRoadScanningPage />} />
-          <Route path="/gps-location" element={<GpsLocationPage />} />
+          <Route path="/dashboard" element={<UserRoute><LiveRoadScanningPage /></UserRoute>} />
+          <Route path="/live-scan" element={<UserRoute><LiveRoadScanningPage /></UserRoute>} />
+          <Route path="/gps-location" element={<UserRoute><GpsLocationPage /></UserRoute>} />
           <Route path="/map" element={<InteractiveMapPage />} />
           <Route path="/safe-route" element={<SafeRoutePage />} />
           <Route path="/report-damage" element={<ReportDamagePage />} />
@@ -74,7 +84,7 @@ export const AppRoutes = () => {
           <Route path="/admin/potholes" element={<AdminRoute><PotholeManagementPage /></AdminRoute>} />
           <Route path="/admin/repairs" element={<AdminRoute><RepairManagementPage /></AdminRoute>} />
           <Route path="/admin/verification" element={<AdminRoute><RoadVerificationPage /></AdminRoute>} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/analytics" element={<AdminRoute><AnalyticsPage /></AdminRoute>} />
         </Route>
 
         {/* Catch-all redirect */}

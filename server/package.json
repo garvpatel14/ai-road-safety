@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "init-db": "node src/config/initDb.js"
+    "init-db": "node src/config/initDb.js",
+    "create-admins": "node src/config/createAdmins.js",
+    "check-setup": "node check-setup.js",
+    "test-auth": "node test-auth.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -15,6 +18,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "nodemailer": "^10.0.10",
     "pg": "^8.12.0"
   },
   "devDependencies": {

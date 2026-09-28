@@ -39,13 +39,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Admin Dashboard', path: '/admin', icon: ShieldCheck, badge: 'Admin' },
     { name: 'Road Surface Heatmap', path: '/admin/heatmap', icon: Flame, badge: 'Heat' },
     { name: 'Pothole Management', path: '/admin/potholes', icon: FileText, badge: 'Queue' },
-    { name: 'Repair Dispatch', path: '/admin/repairs', icon: Wrench, badge: 'Dispatch' },
     { name: 'Road Verification Desk', path: '/admin/verification', icon: UserCheck, badge: 'Audit' },
     { name: 'Interactive Map', path: '/map', icon: MapPin },
-    { name: 'Safe Route Planner', path: '/safe-route', icon: Navigation, badge: 'AI' },
     { name: 'City Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'All Damage Reports', path: '/my-reports', icon: FileText },
-    { name: 'Notifications', path: '/notifications', icon: Bell },
     { name: 'Admin Profile', path: '/profile', icon: User },
   ];
 

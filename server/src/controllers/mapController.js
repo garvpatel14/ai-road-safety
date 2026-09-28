@@ -117,27 +117,65 @@ const planSafeRoute = async (req, res) => {
     const midpointLat = (sLat + eLat) / 2;
     const midpointLng = (sLng + eLng) / 2;
 
-    // Offset detour if direct path has critical hazards
-    const hasCritical = detectedHazards.some(h => h.severity === 'Critical' || h.severity === 'High');
-    const offset = hasCritical ? 0.006 : 0.001;
+    // Direct distance in km
+    const directKm = Math.hypot((eLat - sLat) * 111, (eLng - sLng) * 102);
 
-    const safeRoute = {
+    // Fastest Route: Direct path through primary corridors
+    const fastDist = Math.max(1.5, +(directKm * 1.15).toFixed(1));
+    const fastMins = Math.max(4, Math.round(fastDist * 2.3));
+    const fastSafety = Math.max(45, 85 - detectedHazards.length * 10);
+
+    const fastestRoute = {
+      id: 'fastest',
+      name: 'Fastest Route (Direct Path)',
       summary: {
-        distanceKm: 4.8,
-        estimatedMinutes: 11,
-        safetyScore: hasCritical ? 96 : 99,
-        hazardsAvoided: detectedHazards.length,
-        surfaceQuality: 'Smooth / High RQI (88/100)',
+        distanceKm: fastDist,
+        estimatedMinutes: fastMins,
+        safetyScore: fastSafety,
+        hazardsOnPath: detectedHazards.length,
+        surfaceQuality: detectedHazards.length > 2 ? 'Degraded Asphalt (RQI 48/100)' : 'Fair (RQI 65/100)',
       },
       waypoints: [
         [sLat, sLng],
-        [midpointLat + offset, midpointLng - offset],
-        [eLat, eLng]
+        [sLat + (eLat - sLat) * 0.33, sLng + (eLng - sLng) * 0.3],
+        [sLat + (eLat - sLat) * 0.66, sLng + (eLng - sLng) * 0.7],
+        [eLat, eLng],
       ],
       detectedHazardsAlongDirectPath: detectedHazards,
     };
 
-    return res.json({ route: safeRoute });
+    // Safest Route: AI-optimized corridor detouring around hazards
+    const offset = hasCritical ? 0.007 : 0.003;
+    const safeDist = Math.max(1.8, +(directKm * 1.32).toFixed(1));
+    const safeMins = Math.max(5, Math.round(safeDist * 2.45));
+
+    const safestRoute = {
+      id: 'safest',
+      name: 'Safest Route (AI Pothole Avoidance)',
+      summary: {
+        distanceKm: safeDist,
+        estimatedMinutes: safeMins,
+        safetyScore: 98,
+        hazardsAvoided: detectedHazards.length,
+        hazardsOnPath: 0,
+        surfaceQuality: 'Smooth Resurfaced Asphalt (RQI 94/100)',
+      },
+      waypoints: [
+        [sLat, sLng],
+        [sLat + offset * 0.7, sLng + (eLng - sLng) * 0.25 - offset * 0.5],
+        [midpointLat + offset, midpointLng - offset],
+        [eLat + offset * 0.4, eLng - offset * 0.3],
+        [eLat, eLng],
+      ],
+      detectedHazardsAvoided: detectedHazards,
+    };
+
+    return res.json({
+      route: safestRoute, // backward compatibility
+      safestRoute,
+      fastestRoute,
+      detectedHazards,
+    });
   } catch (err) {
     console.error('Safe route planner error:', err);
     return res.status(500).json({ error: 'Failed to calculate safe route' });

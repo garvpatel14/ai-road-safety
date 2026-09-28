@@ -12,6 +12,7 @@ import {
   Search,
   Activity,
   CheckCircle2,
+  ShieldCheck,
   Loader2
 } from 'lucide-react';
 import { Card } from '../components/common/Card';
@@ -99,6 +100,14 @@ export const InteractiveMapPage = () => {
             <Activity className="w-3.5 h-3.5" />
             {showRqiLayer ? 'RQI Layer ACTIVE' : 'Enable RQI Layer'}
           </button>
+
+          <a
+            href="/safe-route"
+            className="px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white shadow transition"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Fastest vs Safest Route</span>
+          </a>
 
           <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 hidden sm:block" />
 
@@ -218,7 +227,13 @@ export const InteractiveMapPage = () => {
 
       {/* MAP CONTAINER */}
       <div className="h-[600px] w-full rounded-3xl overflow-hidden shadow-2xl">
-        <LeafletMap reports={filteredReports} />
+        <LeafletMap
+          center={[22.5645, 72.9289]}
+          zoom={13}
+          reports={filteredReports}
+          showRqiLayer={showRqiLayer}
+          rqiSegments={rqiSegments}
+        />
       </div>
 
       {/* HAZARD DETAILS MODAL */}

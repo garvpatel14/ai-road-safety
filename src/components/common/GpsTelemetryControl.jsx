@@ -17,7 +17,7 @@ export const GpsTelemetryControl = ({ onCoordsUpdate, compact = false }) => {
   const [isSimulating, setIsSimulating] = useState(false);
   const [speed, setSpeed] = useState(45);
   const [heading, setHeading] = useState(185);
-  const [coords, setCoords] = useState({ lat: 37.7749, lng: -122.4194, accuracy: 3.2 });
+  const [coords, setCoords] = useState({ lat: 22.5645, lng: 72.9289, accuracy: 3.2 });
   const [satellites, setSatellites] = useState(14);
   const [geofenceAlert, setGeofenceAlert] = useState(false);
 
@@ -65,7 +65,7 @@ export const GpsTelemetryControl = ({ onCoordsUpdate, compact = false }) => {
         },
         () => {
           // Fallback if denied
-          setCoords({ lat: 37.7749, lng: -122.4194, accuracy: 5.0 });
+          setCoords({ lat: 22.5645, lng: 72.9289, accuracy: 5.0 });
         }
       );
     }
@@ -136,7 +136,7 @@ export const GpsTelemetryControl = ({ onCoordsUpdate, compact = false }) => {
 
         <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
           <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Longitude</span>
-          <span className="font-mono font-extrabold text-slate-900 dark:text-white text-sm">{coords.lng.toFixed(5)}° W</span>
+          <span className="font-mono font-extrabold text-slate-900 dark:text-white text-sm">{coords.lng.toFixed(5)}° E</span>
         </div>
 
         <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">

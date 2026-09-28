@@ -6,18 +6,11 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : {
-      id: 'USR-DEFAULT',
-      name: 'Alex Morgan',
-      email: 'alex.morgan@saferoad.ai',
-      role: 'user', // 'user' or 'admin'
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      token: 'mock-jwt-token-saferoad-ai-2026'
-    };
+    return savedUser ? JSON.parse(savedUser) : null;
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return !!localStorage.getItem('token') || true; // Default logged in for smooth demo experience
+    return !!localStorage.getItem('token');
   });
 
   useEffect(() => {
@@ -39,33 +32,11 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return completeUser;
     } catch (err) {
-      console.warn('Backend login fallback:', err.message);
-      const mockUser = {
-        id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
-        name: email.split('@')[0].replace('.', ' ').toUpperCase(),
-        email: email,
-        role: email.includes('admin') ? 'admin' : 'user',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-        token: 'jwt-token-saferoad-' + Date.now()
-      };
-      setUser(mockUser);
-      setIsAuthenticated(true);
-      return mockUser;
+      // Propagate the real error — no mock fallback
+      const message =
+        err?.response?.data?.error || err.message || 'Login failed. Please check your credentials.';
+      throw new Error(message);
     }
-  };
-
-  const googleLogin = () => {
-    const mockUser = {
-      id: 'USR-G-8821',
-      name: 'Alex Morgan',
-      email: 'alex.morgan.google@saferoad.ai',
-      role: 'user',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      token: 'google-oauth2-jwt-token-saferoad'
-    };
-    setUser(mockUser);
-    setIsAuthenticated(true);
-    return mockUser;
   };
 
   const register = async (name, email, password) => {
@@ -77,18 +48,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return completeUser;
     } catch (err) {
-      console.warn('Backend register fallback:', err.message);
-      const mockUser = {
-        id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
-        name: name,
-        email: email,
-        role: 'user',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-        token: 'jwt-registered-token-saferoad'
-      };
-      setUser(mockUser);
-      setIsAuthenticated(true);
-      return mockUser;
+      // Propagate the real error — no mock fallback
+      const message =
+        err?.response?.data?.error || err.message || 'Registration failed. Please try again.';
+      throw new Error(message);
     }
   };
 
@@ -119,7 +82,6 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthenticated,
         login,
-        googleLogin,
         register,
         logout,
         toggleRole,

@@ -57,9 +57,8 @@ export const AdminDashboardPage = () => {
   const municipalModules = [
     { name: 'Road Heatmap', path: '/admin/heatmap', icon: Flame, color: 'text-red-500 bg-red-500/10', desc: 'Defect density & corridor risk' },
     { name: 'Pothole Management', path: '/admin/potholes', icon: FileText, color: 'text-brand-500 bg-brand-500/10', desc: 'Triage & priority matrix sorting' },
-    { name: 'Repair Dispatch', path: '/admin/repairs', icon: Wrench, color: 'text-amber-500 bg-amber-500/10', desc: 'Work orders & crew dispatch' },
     { name: 'Verification Desk', path: '/admin/verification', icon: UserCheck, color: 'text-emerald-500 bg-emerald-500/10', desc: 'AI confidence & engineer audit' },
-    { name: 'City Analytics', path: '/analytics', icon: BarChart3, color: 'text-purple-500 bg-purple-500/10', desc: 'SLA response times & budgets' },
+    { name: 'City Analytics', path: '/analytics', icon: BarChart3, color: 'text-purple-500 bg-purple-500/10', desc: 'SLA response times & metrics' },
   ];
 
   // Handle Approve Report
@@ -70,7 +69,7 @@ export const AdminDashboardPage = () => {
     try {
       await api.put(`/reports/${id}/status`, { status: 'Scheduled' });
     } catch (e) {}
-    addToast(`Report ${id} Approved and scheduled for repair dispatch!`, 'success');
+    addToast(`Report ${id} approved successfully!`, 'success');
   };
 
   // Handle Reject Report
@@ -142,7 +141,7 @@ export const AdminDashboardPage = () => {
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Admin Operations & Control</h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Moderate community submissions, audit AI detections, issue work orders, and assign repair crews.
+            Moderate community submissions, audit AI detections, and prioritize road hazard actions.
           </p>
         </div>
 
@@ -155,7 +154,7 @@ export const AdminDashboardPage = () => {
       </div>
 
       {/* QUICK LAUNCHER CARDS FOR MUNICIPALITY MODULES */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {municipalModules.map((m) => {
           const Icon = m.icon;
           return (
@@ -191,9 +190,9 @@ export const AdminDashboardPage = () => {
           color="safety"
         />
         <StatCard
-          title="Pending Repairs Queue"
+          title="Pending Action Queue"
           value={reports.filter(r => r.status === 'Pending' || r.status === 'In Progress').length}
-          icon={Wrench}
+          icon={Clock}
           color="purple"
         />
         <StatCard
@@ -210,7 +209,6 @@ export const AdminDashboardPage = () => {
           { id: 'overview', name: 'Dashboard Overview', icon: ShieldCheck },
           { id: 'reports', name: 'Manage Road Reports', icon: FileText },
           { id: 'users', name: 'User Access Control', icon: Users },
-          { id: 'repairs', name: 'Repairs Dispatch', icon: Wrench },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -368,42 +366,6 @@ export const AdminDashboardPage = () => {
             </table>
           </div>
         </Card>
-      )}
-
-      {/* TAB CONTENT 3: REPAIRS DISPATCH */}
-      {(activeTab === 'repairs') && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {['Scheduled', 'In Progress', 'Resolved'].map((statusGroup) => (
-            <Card key={statusGroup} className="space-y-4">
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-sm uppercase tracking-wider flex items-center justify-between">
-                <span>{statusGroup} Work Orders</span>
-                <StatusBadge status={statusGroup} />
-              </h3>
-
-              <div className="space-y-3">
-                {reports
-                  .filter(r => r.status === statusGroup)
-                  .map(item => (
-                    <div key={item.id} className="p-3.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 space-y-2 border border-slate-200 dark:border-slate-700">
-                      <div className="flex justify-between items-start">
-                        <span className="font-bold text-xs text-slate-900 dark:text-white">{item.id} - {item.type}</span>
-                        <span className="text-[10px] text-slate-400">{item.date}</span>
-                      </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">{item.locationName}</p>
-                      <div className="flex justify-end pt-1">
-                        <button
-                          onClick={() => handleUpdateStatus(item.id, statusGroup === 'Scheduled' ? 'In Progress' : 'Resolved')}
-                          className="text-xs text-brand-600 dark:text-brand-400 font-bold hover:underline"
-                        >
-                          Promote to next stage →
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </Card>
-          ))}
-        </div>
       )}
 
       {/* Hazard Details Modal */}

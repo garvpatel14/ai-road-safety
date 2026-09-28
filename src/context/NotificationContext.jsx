@@ -20,39 +20,48 @@ export const NotificationProvider = ({ children }) => {
     fetchNotifications();
   }, []);
 
-  const addToast = (message, type = 'info', duration = 4000) => {
+  const removeToast = React.useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const addToast = React.useCallback((message, type = 'info', duration = 3500) => {
     const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts(prev => {
+      // Prevent duplicate messages if already showing
+      if (prev.some(t => t.message === message)) {
+        return prev;
+      }
+      // Keep maximum 3 toasts on screen to prevent cluttering
+      const trimmed = prev.length >= 3 ? prev.slice(prev.length - 2) : prev;
+      return [...trimmed, { id, message, type }];
+    });
+
     setTimeout(() => {
       removeToast(id);
     }, duration);
-  };
+  }, [removeToast]);
 
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
-
-  const markAsRead = async (id) => {
+  const markAsRead = React.useCallback(async (id) => {
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, read: true } : n))
     );
     try {
       await api.put(`/analytics/notifications/${id}/read`);
     } catch (e) {}
-  };
+  }, []);
 
-  const markAllAsRead = async () => {
+  const markAllAsRead = React.useCallback(async () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     try {
       await api.put('/analytics/notifications/all/read');
     } catch (e) {}
-  };
+  }, []);
 
-  const clearNotifications = () => {
+  const clearNotifications = React.useCallback(() => {
     setNotifications([]);
-  };
+  }, []);
 
-  const addNotification = (notif) => {
+  const addNotification = React.useCallback((notif) => {
     const newNotif = {
       id: 'NOT-' + Date.now(),
       time: 'Just now',
@@ -60,7 +69,7 @@ export const NotificationProvider = ({ children }) => {
       ...notif
     };
     setNotifications(prev => [newNotif, ...prev]);
-  };
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

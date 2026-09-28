@@ -25,6 +25,7 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const isAdmin = user?.role === 'admin';
 
   return (
     <nav className="sticky top-0 z-40 w-full glass-panel border-b border-slate-200/60 dark:border-slate-800/80 shadow-sm transition-colors duration-300">
@@ -113,7 +114,8 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
             ) : (
               <>
                 {/* Notifications Menu */}
-                <div className="relative">
+                {!isAdmin && (
+                  <div className="relative">
                   <button
                     onClick={() => {
                       setShowNotifMenu(!showNotifMenu);
@@ -176,6 +178,7 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
                     </div>
                   )}
                 </div>
+                )}
 
                 {/* Auth Account Dropdown */}
                 {isAuthenticated ? (
