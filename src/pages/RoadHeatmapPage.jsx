@@ -122,7 +122,7 @@ export const RoadHeatmapPage = () => {
         
         {/* Map View (2 Cols) */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="relative rounded-3xl overflow-hidden glass-panel border border-slate-200 dark:border-slate-800 shadow-xl">
+          <div className="relative h-[480px] md:h-[560px] rounded-3xl overflow-hidden glass-panel border border-slate-200 dark:border-slate-800 shadow-xl">
             <LeafletMap reports={INITIAL_REPORTS} />
           </div>
         </div>

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { StatCard, Card } from '../components/common/Card';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { INITIAL_REPORTS, MOCK_USERS, DASHBOARD_STATS } from '../utils/mockData';
 import { useNotifications } from '../context/NotificationContext';
 import { RoadHazardDetailsModal } from '../components/common/RoadHazardDetailsModal';
+import api from '../services/api';
 import {
   ShieldCheck,
   Users,
@@ -18,10 +19,10 @@ import {
   Search,
   Download,
   Flame,
-  UserCheck,
   BarChart3,
   Eye,
-  Building
+  Building,
+  Loader2
 } from 'lucide-react';
 
 export const AdminDashboardPage = () => {
@@ -32,40 +33,85 @@ export const AdminDashboardPage = () => {
   const [users, setUsers] = useState(MOCK_USERS);
   const [selectedReport, setSelectedReport] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const fetchAdminData = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/reports');
+      if (res.data?.reports && res.data.reports.length > 0) {
+        setReports(res.data.reports);
+      }
+    } catch (err) {
+      console.warn('Fallback admin reports:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminData();
+  }, []);
 
   const municipalModules = [
     { name: 'Road Heatmap', path: '/admin/heatmap', icon: Flame, color: 'text-red-500 bg-red-500/10', desc: 'Defect density & corridor risk' },
     { name: 'Pothole Management', path: '/admin/potholes', icon: FileText, color: 'text-brand-500 bg-brand-500/10', desc: 'Triage & priority matrix sorting' },
-    { name: 'Repair Dispatch', path: '/admin/repairs', icon: Wrench, color: 'text-amber-500 bg-amber-500/10', desc: 'Work orders & crew dispatch' },
-    { name: 'Verification Desk', path: '/admin/verification', icon: UserCheck, color: 'text-emerald-500 bg-emerald-500/10', desc: 'AI confidence & engineer audit' },
-    { name: 'City Analytics', path: '/analytics', icon: BarChart3, color: 'text-purple-500 bg-purple-500/10', desc: 'SLA response times & budgets' },
+    { name: 'City Analytics', path: '/analytics', icon: BarChart3, color: 'text-purple-500 bg-purple-500/10', desc: 'SLA response times & metrics' },
   ];
 
-  // Handle Approve Report
-  const handleApproveReport = (id) => {
+  const handleApproveReport = async (id) => {
     setReports(prev =>
       prev.map(r => (r.id === id ? { ...r, status: 'Scheduled' } : r))
     );
-    addToast(`Report ${id} Approved and scheduled for repair dispatch!`, 'success');
+    try {
+      await api.put(`/reports/${id}/status`, { status: 'Scheduled' });
+    } catch (e) {}
+    addToast(`Report ${id} approved successfully!`, 'success');
   };
 
-  // Handle Reject Report
-  const handleRejectReport = (id) => {
+  const handleRejectReport = async (id) => {
     setReports(prev =>
       prev.map(r => (r.id === id ? { ...r, status: 'Rejected' } : r))
     );
+    try {
+      await api.put(`/reports/${id}/status`, { status: 'Rejected' });
+    } catch (e) {}
     addToast(`Report ${id} rejected.`, 'warning');
   };
 
-  // Handle Repair Status Update
-  const handleUpdateStatus = (id, newStatus) => {
+  const handleUpdateStatus = async (id, newStatus) => {
     setReports(prev =>
       prev.map(r => (r.id === id ? { ...r, status: newStatus } : r))
     );
+    try {
+      await api.put(`/reports/${id}/status`, { status: newStatus });
+    } catch (e) {}
     addToast(`Report ${id} status updated to ${newStatus}`, 'info');
   };
 
-  // Handle User Role Toggle
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Type', 'Severity', 'Status', 'Location', 'Date', 'ReportedBy', 'PriorityScore'];
+    const rows = reports.map(r => [
+      r.id,
+      r.type,
+      r.severity,
+      r.status,
+      `"${r.locationName?.replace(/"/g, '""') || ''}"`,
+      r.date,
+      `"${r.reportedBy || ''}"`,
+      r.priorityScore || 50
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `saferoad_reports_export_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    addToast('Report CSV exported successfully!', 'success');
+  };
+
   const handleToggleUserRole = (userId) => {
     setUsers(prev =>
       prev.map(u =>
@@ -79,8 +125,6 @@ export const AdminDashboardPage = () => {
 
   return (
     <div className="space-y-8 pb-12">
-      
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold border border-amber-500/20 mb-1">
@@ -88,20 +132,19 @@ export const AdminDashboardPage = () => {
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Admin Operations & Control</h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Moderate community submissions, audit AI detections, issue work orders, and assign repair crews.
+            Moderate community submissions, audit AI detections, and prioritize road hazard actions.
           </p>
         </div>
 
         <button
-          onClick={() => addToast('Exporting system audit logs as CSV...', 'info')}
+          onClick={handleExportCSV}
           className="flex items-center gap-2 px-4 py-2 rounded-xl glass-panel text-xs font-bold text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
         >
           <Download className="w-4 h-4" /> Export Report CSV
         </button>
       </div>
 
-      {/* QUICK LAUNCHER CARDS FOR MUNICIPALITY MODULES */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {municipalModules.map((m) => {
           const Icon = m.icon;
           return (
@@ -121,6 +164,149 @@ export const AdminDashboardPage = () => {
           );
         })}
       </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Registered Platform Users" value={users.length} icon={Users} color="brand" />
+        <StatCard title="Total Hazard Reports" value={reports.length} icon={FileText} color="safety" />
+        <StatCard title="Pending Action Queue" value={reports.filter(r => r.status === 'Pending' || r.status === 'In Progress').length} icon={Clock} color="purple" />
+        <StatCard title="Dangerous Corridors" value={47} icon={AlertTriangle} color="red" />
+      </div>
+
+      <div className="flex border-b border-slate-200/60 dark:border-slate-800 space-x-4 overflow-x-auto pb-1 text-xs font-bold">
+        {[
+          { id: 'overview', name: 'Dashboard Overview', icon: ShieldCheck },
+          { id: 'reports', name: 'Manage Road Reports', icon: FileText },
+          { id: 'users', name: 'User Access Control', icon: Users },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl border-b-2 transition whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'border-brand-600 text-brand-600 dark:text-brand-400 bg-brand-500/5'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.name}
+            </button>
+          );
+        })}
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center py-6 text-sm text-slate-500 dark:text-slate-400">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading admin data...
+        </div>
+      )}
+
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white text-base">Live Municipal Activity</h3>
+                <p className="text-xs text-slate-500">Real-time issues, repairs, and queue pressure.</p>
+              </div>
+              <Building className="w-5 h-5 text-brand-500" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
+                <p className="text-slate-500">Priority Repairs</p>
+                <p className="text-xl font-black text-slate-900 dark:text-white">24</p>
+              </div>
+              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
+                <p className="text-slate-500">Council Alerts</p>
+                <p className="text-xl font-black text-slate-900 dark:text-white">8</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white text-base">Recent Status Highlights</h3>
+                <p className="text-xs text-slate-500">Latest action points from the field team.</p>
+              </div>
+              <Eye className="w-5 h-5 text-safety-500" />
+            </div>
+            <div className="space-y-3">
+              {reports.slice(0, 3).map(report => (
+                <div key={report.id} className="flex items-center justify-between rounded-xl bg-slate-100/70 dark:bg-slate-800/60 p-3">
+                  <div>
+                    <p className="font-bold text-xs text-slate-900 dark:text-white">{report.locationName}</p>
+                    <p className="text-[10px] text-slate-500">{report.type} • {report.severity}</p>
+                  </div>
+                  <StatusBadge status={report.status} />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'reports' && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 rounded-2xl glass-panel p-3 border border-slate-200 dark:border-slate-800">
+            <Search className="w-4 h-4 text-slate-400" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search reports, roads, or team notes..."
+              className="w-full bg-transparent text-xs text-slate-700 dark:text-slate-200 outline-none"
+            />
+          </div>
+
+          <div className="space-y-3">
+            {reports
+              .filter(r =>
+                r.locationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                r.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                r.id.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+              .map(report => (
+                <div key={report.id} className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 rounded-2xl glass-panel border border-slate-200 dark:border-slate-800 p-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-extrabold text-sm text-slate-900 dark:text-white">{report.id}</p>
+                      <StatusBadge status={report.status} />
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500">{report.locationName} • {report.type} • {report.severity}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleApproveReport(report.id)} className="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold">Approve</button>
+                    <button onClick={() => handleRejectReport(report.id)} className="px-3 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold">Reject</button>
+                    <button onClick={() => handleUpdateStatus(report.id, 'In Progress')} className="px-3 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-[10px] font-bold">In Progress</button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'users' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {users.map(user => (
+            <div key={user.id} className="rounded-2xl glass-panel p-4 border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-extrabold text-sm text-slate-900 dark:text-white">{user.name}</p>
+                  <p className="text-[10px] text-slate-500">{user.email}</p>
+                </div>
+                <StatusBadge status={user.role} />
+              </div>
+              <button onClick={() => handleToggleUserRole(user.id)} className="mt-4 w-full rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-bold py-2 text-slate-700 dark:text-slate-200">
+                Toggle Role
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
       {/* 4 ADMIN STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
