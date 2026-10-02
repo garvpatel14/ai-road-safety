@@ -308,7 +308,8 @@ export const AdminDashboardPage = () => {
   );
 };
 
-      {/* 4 ADMIN STAT CARDS */}
+/*
+      {/* 4 ADMIN STAT CARDS * /}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Registered Platform Users"
@@ -336,7 +337,7 @@ export const AdminDashboardPage = () => {
         />
       </div>
 
-      {/* ADMIN NAVIGATION TABS */}
+      {/* ADMIN NAVIGATION TABS * /}
       <div className="flex border-b border-slate-200/60 dark:border-slate-800 space-x-4 overflow-x-auto pb-1 text-xs font-bold">
         {[
           { id: 'overview', name: 'Dashboard Overview', icon: ShieldCheck },
@@ -361,7 +362,7 @@ export const AdminDashboardPage = () => {
         })}
       </div>
 
-      {/* TAB CONTENT 1: ROAD REPORTS MANAGEMENT */}
+      {/* TAB CONTENT 1: ROAD REPORTS MANAGEMENT * /}
       {(activeTab === 'overview' || activeTab === 'reports') && (
         <Card className="space-y-4 p-0 overflow-hidden">
           <div className="p-4 border-b border-slate-200/60 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -404,7 +405,7 @@ export const AdminDashboardPage = () => {
                       <td className="p-4"><StatusBadge status={r.severity} /></td>
                       <td className="p-4"><StatusBadge status={r.status} /></td>
 
-                      {/* Approve / Reject Actions */}
+                      {/* Approve / Reject Actions * /}
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button
@@ -431,7 +432,7 @@ export const AdminDashboardPage = () => {
                         </div>
                       </td>
 
-                      {/* Update Repair Status Dropdown */}
+                      {/* Update Repair Status Dropdown * /}
                       <td className="p-4 text-right">
                         <select
                           value={r.status}
@@ -454,7 +455,7 @@ export const AdminDashboardPage = () => {
         </Card>
       )}
 
-      {/* TAB CONTENT 2: USER ACCESS CONTROL */}
+      {/* TAB CONTENT 2: USER ACCESS CONTROL * /}
       {(activeTab === 'users') && (
         <Card className="space-y-4 p-0 overflow-hidden">
           <div className="p-4 border-b border-slate-200/60 dark:border-slate-800">
@@ -502,7 +503,7 @@ export const AdminDashboardPage = () => {
         </Card>
       )}
 
-      {/* TAB CONTENT 3: REPAIRS DISPATCH */}
+      {/* TAB CONTENT 3: REPAIRS DISPATCH * /}
       {(activeTab === 'repairs') && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {['Scheduled', 'In Progress', 'Resolved'].map((statusGroup) => (
@@ -538,7 +539,7 @@ export const AdminDashboardPage = () => {
         </div>
       )}
 
-      {/* Hazard Details Modal */}
+      {/* Hazard Details Modal * /}
       <RoadHazardDetailsModal
         isOpen={Boolean(selectedReport)}
         onClose={() => setSelectedReport(null)}
@@ -548,3 +549,4 @@ export const AdminDashboardPage = () => {
     </div>
   );
 };
+*/

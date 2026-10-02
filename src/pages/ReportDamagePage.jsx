@@ -154,6 +154,13 @@ const formatBytes = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
+const readImageAsBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result).split(',')[1]);
+  reader.onerror = () => reject(new Error('The selected image could not be read.'));
+  reader.readAsDataURL(file);
+});
+
 export const ReportDamagePage = () => {
   const { addToast, addNotification } = useNotifications();
   const navigate = useNavigate();
@@ -209,7 +216,7 @@ export const ReportDamagePage = () => {
     const url = URL.createObjectURL(file);
     setUploadedFile({ file, preview: url, type: isImage ? 'image' : 'video' });
     setAiConfidence(null);
-    if (isImage) simulateAiDetection();
+    if (isImage) void analyzeRoadImage(file);
     setErrors((prev) => ({ ...prev, file: null }));
   };
 
@@ -228,13 +235,39 @@ export const ReportDamagePage = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const simulateAiDetection = () => {
+  const analyzeRoadImage = async (file) => {
     setIsAiAnalyzing(true);
-    setTimeout(() => {
+    try {
+      const image = await readImageAsBase64(file);
+      const response = await fetch('/ml-api/detect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image, conf: 0.4 }),
+      });
+
+      if (!response.ok) throw new Error('Road-scan service is unavailable.');
+
+      const result = await response.json();
+      const detections = Array.isArray(result.detections) ? result.detections : [];
+      if (detections.length === 0) {
+        setAiConfidence('No road defect detected by the YOLOv8 road-scan model.');
+        return;
+      }
+
+      const detection = detections[0];
+      const label = detection.label || detection.class_name || detection.type || 'Road defect';
+      const rawConfidence = Number(detection.confidence ?? detection.conf ?? 0);
+      const confidence = rawConfidence <= 1 ? rawConfidence * 100 : rawConfidence;
+      setAiConfidence(`${confidence.toFixed(1)}% YOLOv8 match: ${label}`);
+      setDamageType(label);
+      if (detection.severity) setSeverity(detection.severity);
+      addToast(`${detections.length} road defect${detections.length === 1 ? '' : 's'} detected by the AI model.`, 'success');
+    } catch (error) {
+      setAiConfidence('Road-scan model is unavailable. Start the ML service and try again.');
+      addToast(error.message || 'Unable to analyze this road image.', 'warning');
+    } finally {
       setIsAiAnalyzing(false);
-      setAiConfidence('96.8% Match: Deep Pothole detected with high structural risk');
-      addToast('AI Vision automatically classified road damage severity!', 'info');
-    }, 1200);
+    }
   };
 
   // ── GPS auto-detect ────────────────────────────────────────────────────────

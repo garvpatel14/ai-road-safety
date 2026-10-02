@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // Create base Axios instance
 const api = axios.create({
-  baseURL: 'https://api.saferoad.ai/v1', // Base URL for AI Road Safety endpoints
+  // In development Vite forwards /api to the local backend. Set VITE_API_URL
+  // when deploying to point at the production API.
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
