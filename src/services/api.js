@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 // Create base Axios instance
 const api = axios.create({
-  baseURL: 'https://api.saferoad.ai/v1', // Base URL for AI Road Safety endpoints
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

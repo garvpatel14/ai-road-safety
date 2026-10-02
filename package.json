@@ -5,6 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "node server/src/server.js",
+    "ml:serve": "python server/ml_server.py",
+    "ml:test": "python server/scripts/make_ml_model.py --test-only",
+    "ml:train": "python server/scripts/make_ml_model.py --quick",
+    "ml:train:rdd": "python server/scripts/train_from_rdd.py",
+    "ml:verify": "python test_ml_model.py",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

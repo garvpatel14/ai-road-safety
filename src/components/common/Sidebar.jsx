@@ -10,9 +10,13 @@ import {
   Bell,
   User,
   ShieldCheck,
+  PlusCircle,
   Sparkles,
   Camera,
+  Radio,
   Flame,
+  Wrench,
+  UserCheck,
   Activity
 } from 'lucide-react';
 
@@ -21,8 +25,11 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   const userNavItems = [
     { name: 'Live Road Scan', path: '/live-scan', icon: Camera, badge: 'HUD' },
+    { name: 'GPS Location Drive', path: '/gps-location', icon: Radio, badge: 'GNSS' },
+    { name: 'Road Quality Map', path: '/map', icon: MapPin },
     { name: 'Safe Route Planner', path: '/safe-route', icon: Navigation, badge: 'AI' },
     { name: 'Report Damage', path: '/report-damage', icon: AlertTriangle },
+    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'My Reports', path: '/my-reports', icon: FileText },
     { name: 'Notifications', path: '/notifications', icon: Bell },
     { name: 'Profile', path: '/profile', icon: User },
@@ -32,8 +39,9 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Admin Dashboard', path: '/admin', icon: ShieldCheck, badge: 'Admin' },
     { name: 'Road Surface Heatmap', path: '/admin/heatmap', icon: Flame, badge: 'Heat' },
     { name: 'Pothole Management', path: '/admin/potholes', icon: FileText, badge: 'Queue' },
+    { name: 'Road Verification Desk', path: '/admin/verification', icon: UserCheck, badge: 'Audit' },
     { name: 'Interactive Map', path: '/map', icon: MapPin },
-    { name: 'City Analytics', path: '/analytics', icon: BarChart3, badge: 'AI' },
+    { name: 'City Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'All Damage Reports', path: '/my-reports', icon: FileText },
     { name: 'Admin Profile', path: '/profile', icon: User },
   ];
@@ -43,6 +51,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
+      {/* Backdrop for Mobile */}
       {isOpen && (
         <div
           onClick={onClose}
@@ -56,6 +65,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
         } overflow-y-auto flex flex-col justify-between`}
       >
         <div className="space-y-5">
+          
+          {/* Quick Action Button */}
           <div className="pt-1">
             {isAdmin ? (
               <NavLink
@@ -78,6 +89,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
             )}
           </div>
 
+          {/* Navigation Links */}
           <div className="space-y-1">
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
               {isAdmin ? 'Municipality Management' : 'Citizen Platform'}
@@ -118,6 +130,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </div>
         </div>
 
+        {/* Bottom AI Status Box */}
         <div className="pt-3 border-t border-slate-200/60 dark:border-slate-800">
           <div className="p-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400">

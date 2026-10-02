@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   Menu,
   X,
-  Sparkles,
   MapPin,
   CheckCircle2
 } from 'lucide-react';
@@ -26,6 +25,7 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const isAdmin = user?.role === 'admin';
 
   return (
     <nav className="sticky top-0 z-40 w-full glass-panel border-b border-slate-200/60 dark:border-slate-800/80 shadow-sm transition-colors duration-300">
@@ -73,13 +73,6 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
               Live Scanner
             </Link>
             <Link
-              to={isPublic ? '/login' : (isAuthenticated ? '/ai-detection' : '/login')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-brand-500" />
-              AI Workbench
-            </Link>
-            <Link
               to={isPublic ? '/login' : (isAuthenticated ? '/map' : '/login')}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
             >
@@ -121,7 +114,8 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
             ) : (
               <>
                 {/* Notifications Menu */}
-                <div className="relative">
+                {!isAdmin && (
+                  <div className="relative">
                   <button
                     onClick={() => {
                       setShowNotifMenu(!showNotifMenu);
@@ -184,6 +178,7 @@ export const Navbar = ({ onToggleSidebar, isSidebarOpen, isPublic = false }) => 
                     </div>
                   )}
                 </div>
+                )}
 
                 {/* Auth Account Dropdown */}
                 {isAuthenticated ? (
