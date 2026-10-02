@@ -2,24 +2,23 @@ import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import { StatusBadge } from '../common/StatusBadge';
-import { ShieldAlert, MapPin, AlertTriangle, Car, CheckCircle2 } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
-// Dynamic Custom HTML Marker Creator
-const createCustomMarker = (type, severity) => {
-  let color = '#3b82f6'; // blue default
+const createCustomMarker = (type) => {
+  let color = '#3b82f6';
   let iconHtml = '📍';
 
   if (type === 'Pothole') {
-    color = '#f97316'; // Safety Orange
+    color = '#f97316';
     iconHtml = '🕳️';
   } else if (type === 'Crack') {
-    color = '#f59e0b'; // Amber
+    color = '#f59e0b';
     iconHtml = '⚡';
   } else if (type === 'Accident') {
-    color = '#ef4444'; // Red
+    color = '#ef4444';
     iconHtml = '💥';
   } else if (type === 'Repair') {
-    color = '#10b981'; // Emerald Green
+    color = '#10b981';
     iconHtml = '🛠️';
   }
 
@@ -36,9 +35,7 @@ const createCustomMarker = (type, severity) => {
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       font-size: 16px;
       cursor: pointer;
-    ">
-      ${iconHtml}
-    </div>
+    ">${iconHtml}</div>
   `;
 
   return L.divIcon({
@@ -50,9 +47,15 @@ const createCustomMarker = (type, severity) => {
   });
 };
 
-export const LeafletMap = ({ reports = [], center = [37.7749, -122.4194], zoom = 13, polyline = null }) => {
+export const LeafletMap = ({
+  reports = [],
+  center = [37.7749, -122.4194],
+  zoom = 13,
+  polyline = null,
+  className = '',
+}) => {
   return (
-    <div className="w-full h-full min-h-[400px] rounded-2xl overflow-hidden shadow-inner border border-slate-200 dark:border-slate-800 relative z-10">
+    <div className={`w-full h-[420px] md:h-[500px] rounded-2xl overflow-hidden shadow-inner border border-slate-200 dark:border-slate-800 relative z-10 ${className}`}>
       <MapContainer
         center={center}
         zoom={zoom}
@@ -64,7 +67,6 @@ export const LeafletMap = ({ reports = [], center = [37.7749, -122.4194], zoom =
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Render polyline route if provided for safe route feature */}
         {polyline && (
           <Polyline
             positions={polyline}
@@ -75,12 +77,11 @@ export const LeafletMap = ({ reports = [], center = [37.7749, -122.4194], zoom =
           />
         )}
 
-        {/* Markers */}
         {reports.map((report) => (
           <Marker
             key={report.id}
             position={[report.lat, report.lng]}
-            icon={createCustomMarker(report.type, report.severity)}
+            icon={createCustomMarker(report.type)}
           >
             <Popup className="custom-popup">
               <div className="p-1 max-w-xs space-y-2 text-slate-800">
